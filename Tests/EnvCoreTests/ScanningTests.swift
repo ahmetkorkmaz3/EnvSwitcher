@@ -26,6 +26,14 @@ struct ScanningTests {
         ])
     }
 
+    @Test func scanSkipsFilesThatOnlyStartWithEnv() throws {
+        let root = try TempDir.make()
+        try TempDir.write("A=1", to: ".env", in: root)
+        try TempDir.write("use flake", to: ".envrc", in: root)
+        try TempDir.write("A=1", to: "apps/cart/.environment", in: root)
+        #expect(ProjectScanner.scan(root: root).map(\.relativePath) == [".env"])
+    }
+
     @Test func scanMarksTemplatesAsNotSelected() throws {
         let root = try TempDir.make()
         try TempDir.write("A=", to: ".env.sample", in: root)

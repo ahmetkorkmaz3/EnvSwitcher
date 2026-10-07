@@ -37,7 +37,7 @@ public enum ProjectScanner {
                 }
                 continue
             }
-            guard values?.isRegularFile == true, name.hasPrefix(".env") else { continue }
+            guard values?.isRegularFile == true, name == ".env" || name.hasPrefix(".env.") else { continue }
             let path = url.resolvingSymlinksInPath().path
             guard path.hasPrefix(rootPath + "/") else { continue }
             let text = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
