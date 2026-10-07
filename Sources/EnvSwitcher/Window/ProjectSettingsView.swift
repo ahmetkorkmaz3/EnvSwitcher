@@ -63,7 +63,6 @@ struct ProjectSettingsView: View {
                     ForEach(newFiles, id: \.relativePath) { file in
                         Button(file.relativePath) {
                             state.apply { try state.projectEditor.addTarget(relativePath: file.relativePath, to: current) }
-                            loadNewFiles()
                         }
                     }
                 }
@@ -76,7 +75,7 @@ struct ProjectSettingsView: View {
         }
         .formStyle(.grouped)
         .navigationTitle(current.name)
-        .task(id: project.id) { loadNewFiles() }
+        .task(id: ScanKey(rootPath: current.rootPath, targetPaths: current.targets.map(\.relativePath))) { loadNewFiles() }
         .confirmationDialog("\(current.name) silinsin mi?", isPresented: $confirmDelete) {
             Button("Sil", role: .destructive) { state.deleteProject(current) }
         } message: {
@@ -88,6 +87,11 @@ struct ProjectSettingsView: View {
         let known = Set(current.targets.map(\.relativePath))
         newFiles = ProjectScanner.scan(root: current.rootURL).filter { !known.contains($0.relativePath) }
     }
+}
+
+private struct ScanKey: Hashable {
+    let rootPath: String
+    let targetPaths: [String]
 }
 
 private struct EnvironmentRow: View {
