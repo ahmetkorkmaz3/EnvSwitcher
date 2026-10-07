@@ -35,6 +35,9 @@ public struct StoreRepository: Sendable {
     public func load() throws -> StoreLoadResult {
         let fm = FileManager.default
         guard fm.fileExists(atPath: storeURL.path) else {
+            if let backup = try decodeIfValid(backupURL) {
+                return StoreLoadResult(store: backup, notice: .restoredFromBackup)
+            }
             return StoreLoadResult(store: Store(), notice: nil)
         }
         if let store = try decodeIfValid(storeURL) {

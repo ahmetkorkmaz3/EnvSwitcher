@@ -39,6 +39,16 @@ struct StoreRepositoryTests {
         #expect(result.notice == .restoredFromBackup)
     }
 
+    @Test func loadUsesBackupWhenStoreIsMissing() throws {
+        let repo = StoreRepository(directory: try TempDir.make())
+        try repo.save(sampleStore(name: "first"))
+        try repo.save(sampleStore(name: "second"))
+        try FileManager.default.removeItem(at: repo.storeURL)
+        let result = try repo.load()
+        #expect(result.store.projects.map(\.name) == ["first"])
+        #expect(result.notice == .restoredFromBackup)
+    }
+
     @Test func loadResetsAndKeepsCorruptFileWhenBackupIsAlsoCorrupt() throws {
         let dir = try TempDir.make()
         let repo = StoreRepository(directory: dir, now: { [fixedDate] in fixedDate })

@@ -44,6 +44,9 @@ final class AppState {
     var selection: SidebarSelection?
     var showAddProject = false
     var pendingAddURL: URL?
+    /// True when store.json could not be read. Saving then would overwrite the user's data.
+    @ObservationIgnored private var loadFailed = false
+    @ObservationIgnored private var reportedSaveBlocked = false
 
     let repository: StoreRepository
     let secrets: any SecretStore
@@ -88,11 +91,20 @@ final class AppState {
                 DispatchQueue.main.async { Alerts.showInfo(title: "Depo geri yüklendi", message: Self.describe(notice)) }
             }
         } catch {
-            report(error)
+            loadFailed = true
+            let text = message(for: error)
+            DispatchQueue.main.async { Alerts.showError(text) }
         }
     }
 
     func save() {
+        guard !loadFailed else {
+            if !reportedSaveBlocked {
+                reportedSaveBlocked = true
+                Alerts.showError("Depo okunamadı, bu nedenle değişiklikler kaydedilmiyor. Uygulamayı kapatıp yeniden açın.")
+            }
+            return
+        }
         do {
             try repository.save(store)
         } catch {
