@@ -21,6 +21,7 @@ struct DotEnvSerializerTests {
         #expect(DotEnvSerializer.encode("multi\nline") == "\"multi\\nline\"")
         #expect(DotEnvSerializer.encode(#"q"x"#) == #""q\"x""#)
         #expect(DotEnvSerializer.encode(#"c:\path"#) == #""c:\\path""#)
+        #expect(DotEnvSerializer.encode("a\r\nb") == #""a\r\nb""#)
         #expect(DotEnvSerializer.encode("") == "")
     }
 
@@ -28,6 +29,7 @@ struct DotEnvSerializerTests {
         let values = [
             "plain", "", "with space", " lead", "trail ", "a#b", "x #y", "q\"uote", "it's",
             "'single'", "back\\slash", "multi\nline", "url=a=b", "tab\there", "\\n literal",
+            "crlf\r\nvalue", "lone\rcr",
         ]
         let pairs = values.enumerated().map { DotEnvPair(key: "K\($0.offset)", value: $0.element) }
         let text = DotEnvSerializer.serialize(pairs, headerLines: ["header"])

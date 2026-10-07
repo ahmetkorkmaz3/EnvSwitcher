@@ -47,6 +47,10 @@ struct DotEnvParserTests {
         #expect(pairs(#"A="line1\nline2 \"q\" \\ end""#) == [pair("A", "line1\nline2 \"q\" \\ end")])
     }
 
+    @Test func doubleQuotedValueResolvesCarriageReturn() {
+        #expect(pairs(#"A="x\ry""#) == [pair("A", "x\ry")])
+    }
+
     @Test func doubleQuotedValueCanSpanLines() {
         #expect(pairs("A=\"first\nsecond\"\nB=2") == [pair("A", "first\nsecond"), pair("B", "2")])
     }

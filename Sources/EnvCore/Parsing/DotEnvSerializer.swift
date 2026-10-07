@@ -8,11 +8,12 @@ public enum DotEnvSerializer {
 
     /// Wraps the value in double quotes when the parser would otherwise change it.
     static func encode(_ value: String) -> String {
-        let special: Set<Character> = [" ", "\t", "#", "\"", "'", "\n", "\\"]
-        guard value.contains(where: special.contains) else { return value }
+        let special: Set<UnicodeScalar> = [" ", "\t", "#", "\"", "'", "\n", "\r", "\\"]
+        guard value.unicodeScalars.contains(where: special.contains) else { return value }
         let escaped = value
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
+            .replacingOccurrences(of: "\r", with: "\\r")
             .replacingOccurrences(of: "\n", with: "\\n")
         return "\"\(escaped)\""
     }

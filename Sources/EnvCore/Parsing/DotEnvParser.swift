@@ -104,6 +104,7 @@ public enum DotEnvParser {
             guard let next = iterator.next() else { return nil }
             switch next {
             case "n": result.append("\n")
+            case "r": result.append("\r")
             case "\"": result.append("\"")
             case "\\": result.append("\\")
             default:
