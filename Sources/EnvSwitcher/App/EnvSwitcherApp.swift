@@ -14,6 +14,12 @@ struct EnvSwitcherApp: App {
         }
         .menuBarExtraStyle(.menu)
 
+        Window("EnvSwitcher", id: WindowID.manager) {
+            ManagerWindow()
+                .environment(state)
+        }
+        .defaultSize(width: 920, height: 580)
+
         Window("Değişiklikler", id: WindowID.drift) {
             DriftView()
                 .environment(state)
