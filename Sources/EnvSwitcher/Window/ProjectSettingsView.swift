@@ -44,17 +44,7 @@ struct ProjectSettingsView: View {
 
             Section("Hedef dosyalar") {
                 ForEach(current.targets) { target in
-                    HStack {
-                        Text(target.relativePath).font(.system(.body, design: .monospaced))
-                        Spacer()
-                        Button(role: .destructive) {
-                            state.apply { try state.projectEditor.removeTarget(id: target.id, from: current) }
-                        } label: {
-                            Image(systemName: "minus.circle")
-                        }
-                        .buttonStyle(.borderless)
-                        .help("Dosyayı projeden çıkar. Diskteki dosya değişmez.")
-                    }
+                    TargetRow(project: current, target: target)
                 }
                 Menu("Dosya ekle") {
                     if newFiles.isEmpty {
@@ -94,10 +84,39 @@ private struct ScanKey: Hashable {
     let targetPaths: [String]
 }
 
+private struct TargetRow: View {
+    @Environment(AppState.self) private var state
+    let project: Project
+    let target: EnvTarget
+    @State private var confirmRemove = false
+
+    var body: some View {
+        HStack {
+            Text(target.relativePath).font(.system(.body, design: .monospaced))
+            Spacer()
+            Button(role: .destructive) {
+                confirmRemove = true
+            } label: {
+                Image(systemName: "minus.circle")
+            }
+            .buttonStyle(.borderless)
+            .help("Dosyayı projeden çıkar. Diskteki dosya değişmez.")
+        }
+        .confirmationDialog("\(target.relativePath) projeden çıkarılsın mı?", isPresented: $confirmRemove) {
+            Button("Çıkar", role: .destructive) {
+                state.apply { try state.projectEditor.removeTarget(id: target.id, from: project) }
+            }
+        } message: {
+            Text("Bu dosyanın tüm ortam değerleri ve Keychain kayıtları silinir. Diskteki dosya değişmez.")
+        }
+    }
+}
+
 private struct EnvironmentRow: View {
     @Environment(AppState.self) private var state
     let project: Project
     let environment: EnvEnvironment
+    @State private var confirmDelete = false
 
     var body: some View {
         HStack {
@@ -115,12 +134,19 @@ private struct EnvironmentRow: View {
             Toggle("Korumalı", isOn: binding(\.isProtected))
             Spacer()
             Button(role: .destructive) {
-                state.apply { try state.projectEditor.deleteEnvironment(id: environment.id, from: project) }
+                confirmDelete = true
             } label: {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
             .help("Ortamı ve değerlerini sil")
+        }
+        .confirmationDialog("\(environment.name) ortamı silinsin mi?", isPresented: $confirmDelete) {
+            Button("Sil", role: .destructive) {
+                state.apply { try state.projectEditor.deleteEnvironment(id: environment.id, from: project) }
+            }
+        } message: {
+            Text("Bu ortamın tüm değerleri ve Keychain kayıtları silinir. Diskteki .env dosyaları değişmez.")
         }
     }
 
