@@ -25,5 +25,10 @@ struct EnvSwitcherApp: App {
                 .environment(state)
         }
         .windowResizability(.contentSize)
+
+        Settings {
+            SettingsView()
+                .environment(state)
+        }
     }
 }

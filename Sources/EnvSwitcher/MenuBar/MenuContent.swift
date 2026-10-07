@@ -17,6 +17,8 @@ struct MenuContent: View {
         }
         .keyboardShortcut("n")
         Button("Yönet…") { openManager() }
+            .keyboardShortcut("m")
+        SettingsLink { Text("Ayarlar…") }
             .keyboardShortcut(",")
         Divider()
         Button("Çık") { NSApp.terminate(nil) }
