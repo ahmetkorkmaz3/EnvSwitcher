@@ -43,10 +43,26 @@ public struct SwitchExecutor: Sendable {
         guard !failed.isEmpty else { return }
 
         let folder = recoveryDirectory.appendingPathComponent(Timestamp.string(now()), isDirectory: true)
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        } catch {
+            let pathsWithContent = failed.filter { _, original in original != nil }.map { $0.0.relativePath }
+            throw SwitchError.recoveryFailed(paths: pathsWithContent)
+        }
+
+        var recoveryFailures: [String] = []
         for (write, original) in failed {
+            guard let original else { continue }
             let name = write.relativePath.replacingOccurrences(of: "/", with: "__")
-            try? (original ?? Data()).write(to: folder.appendingPathComponent(name))
+            do {
+                try original.write(to: folder.appendingPathComponent(name))
+            } catch {
+                recoveryFailures.append(write.relativePath)
+            }
+        }
+
+        if !recoveryFailures.isEmpty {
+            throw SwitchError.recoveryFailed(paths: recoveryFailures)
         }
         throw SwitchError.rollbackFailed(paths: failed.map { $0.0.relativePath }, recoveryFolder: folder)
     }

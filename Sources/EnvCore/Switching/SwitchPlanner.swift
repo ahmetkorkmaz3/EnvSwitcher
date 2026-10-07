@@ -11,6 +11,8 @@ public enum SwitchError: Error, Equatable {
     case directoryMissing([String])
     case writeFailed(path: String, reason: String)
     case rollbackFailed(paths: [String], recoveryFolder: URL)
+    /// The rollback failed and the old content of these files could not be saved anywhere.
+    case recoveryFailed(paths: [String])
 }
 
 public struct DriftedTarget: Equatable, Sendable {
