@@ -1,0 +1,86 @@
+import Foundation
+import Testing
+@testable import EnvCore
+
+struct EntryEditorTests {
+    private func setUp() throws -> (ProjectFixture, EntryEditor) {
+        var f = try ProjectFixture()
+        f.setEntries([EnvEntry(key: "A", value: "1"), EnvEntry(key: "TOKEN", value: nil, isSecret: true)], target: f.cart, env: f.local)
+        try f.secrets.write("t0", account: f.account(f.cart, f.local, "TOKEN"))
+        return (f, EntryEditor(secrets: f.secrets))
+    }
+
+    @Test func readsPlainAndSecretValues() throws {
+        let (f, editor) = try setUp()
+        #expect(try editor.readValue(key: "A", in: f.project, targetId: f.cart.id, environmentId: f.local) == "1")
+        #expect(try editor.readValue(key: "TOKEN", in: f.project, targetId: f.cart.id, environmentId: f.local) == "t0")
+        #expect(throws: EntryEditor.EditError.unknownKey("X")) {
+            try editor.readValue(key: "X", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        }
+    }
+
+    @Test func addsEntryAtEndAndRejectsDuplicateOrInvalidKey() throws {
+        let (f, editor) = try setUp()
+        let p = try editor.addEntry(key: "B", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local).map(\.key) == ["A", "TOKEN", "B"])
+        #expect(p.targets[0].entries(for: f.local).last == EnvEntry(key: "B", value: ""))
+        #expect(throws: EntryEditor.EditError.duplicateKey("A")) {
+            try editor.addEntry(key: "A", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        }
+        #expect(throws: EntryEditor.EditError.invalidKey("1X")) {
+            try editor.addEntry(key: "1X", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        }
+    }
+
+    @Test func setValueWritesPlainToStoreAndSecretToSecretStore() throws {
+        let (f, editor) = try setUp()
+        var p = try editor.setValue("2", key: "A", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        p = try editor.setValue("t1", key: "TOKEN", in: p, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local) == [EnvEntry(key: "A", value: "2"), EnvEntry(key: "TOKEN", value: nil, isSecret: true)])
+        #expect(f.secrets.snapshot[f.account(f.cart, f.local, "TOKEN")] == "t1")
+    }
+
+    @Test func setSecretMovesValueBetweenStores() throws {
+        let (f, editor) = try setUp()
+        var p = try editor.setSecret(true, key: "A", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local)[0] == EnvEntry(key: "A", value: nil, isSecret: true))
+        #expect(f.secrets.snapshot[f.account(f.cart, f.local, "A")] == "1")
+
+        p = try editor.setSecret(false, key: "TOKEN", in: p, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local)[1] == EnvEntry(key: "TOKEN", value: "t0"))
+        #expect(f.secrets.snapshot[f.account(f.cart, f.local, "TOKEN")] == nil)
+    }
+
+    @Test func renameKeyMovesSecretAccount() throws {
+        let (f, editor) = try setUp()
+        let p = try editor.renameKey("TOKEN", to: "API_TOKEN", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local).map(\.key) == ["A", "API_TOKEN"])
+        #expect(f.secrets.snapshot == [f.account(f.cart, f.local, "API_TOKEN"): "t0"])
+        #expect(throws: EntryEditor.EditError.duplicateKey("A")) {
+            try editor.renameKey("API_TOKEN", to: "A", in: p, targetId: f.cart.id, environmentId: f.local)
+        }
+    }
+
+    @Test func removeEntryDeletesSecret() throws {
+        let (f, editor) = try setUp()
+        let p = try editor.removeEntry(key: "TOKEN", in: f.project, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local).map(\.key) == ["A"])
+        #expect(f.secrets.snapshot.isEmpty)
+    }
+
+    @Test func copyEntriesOverwritesOrSkipsExistingKeys() throws {
+        var (f, editor) = try setUp()
+        f.setEntries([EnvEntry(key: "A", value: "test-a"), EnvEntry(key: "ONLY_TEST", value: "x")], target: f.cart, env: f.test)
+
+        let skipped = try editor.copyEntries(from: f.local, to: f.test, targetId: f.cart.id, mode: .skipExisting, in: f.project)
+        #expect(skipped.targets[0].entries(for: f.test) == [
+            EnvEntry(key: "A", value: "test-a"),
+            EnvEntry(key: "ONLY_TEST", value: "x"),
+            EnvEntry(key: "TOKEN", value: nil, isSecret: true),
+        ])
+        #expect(f.secrets.snapshot[f.account(f.cart, f.test, "TOKEN")] == "t0")
+
+        let overwritten = try editor.copyEntries(from: f.local, to: f.test, targetId: f.cart.id, mode: .overwrite, in: f.project)
+        #expect(overwritten.targets[0].entries(for: f.test)[0] == EnvEntry(key: "A", value: "1"))
+    }
+}
