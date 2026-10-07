@@ -217,12 +217,20 @@ private struct KeyField: View {
     let key: String
     let onCommit: (String) -> Void
     @State private var draft = ""
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         TextField("ANAHTAR", text: $draft)
-            .onSubmit { if draft != key { onCommit(draft) } }
+            .focused($isFocused)
+            .onSubmit {
+                if draft != key { onCommit(draft) }
+                // A successful rename gives the row a new identity and a new KeyField.
+                // After a rejected rename this puts the stored key back.
+                draft = key
+            }
             .onAppear { draft = key }
             .onChange(of: key) { draft = key }
+            .onChange(of: isFocused) { if !isFocused { draft = key } }
     }
 }
 
