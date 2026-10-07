@@ -51,6 +51,15 @@ struct StoreRepositoryTests {
         #expect(!FileManager.default.fileExists(atPath: repo.storeURL.path))
     }
 
+    @Test func loadPropagatesReadErrorsInsteadOfResetting() throws {
+        let repo = StoreRepository(directory: try TempDir.make())
+        try repo.save(sampleStore(name: "first"))
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: repo.storeURL.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: repo.storeURL.path) }
+        #expect(throws: (any Error).self) { try repo.load() }
+        #expect(FileManager.default.fileExists(atPath: repo.storeURL.path))
+    }
+
     @Test func defaultDirectoryIsInApplicationSupport() {
         #expect(StoreRepository.defaultDirectory.path.hasSuffix("Library/Application Support/EnvSwitcher"))
     }

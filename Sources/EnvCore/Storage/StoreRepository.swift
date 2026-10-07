@@ -37,10 +37,10 @@ public struct StoreRepository: Sendable {
         guard fm.fileExists(atPath: storeURL.path) else {
             return StoreLoadResult(store: Store(), notice: nil)
         }
-        if let store = try? decode(storeURL) {
+        if let store = try decodeIfValid(storeURL) {
             return StoreLoadResult(store: store, notice: nil)
         }
-        if let backup = try? decode(backupURL) {
+        if let backup = try decodeIfValid(backupURL) {
             return StoreLoadResult(store: backup, notice: .restoredFromBackup)
         }
         let corrupt = directory.appendingPathComponent("store.json.corrupt-\(Timestamp.string(now()))")
@@ -52,15 +52,21 @@ public struct StoreRepository: Sendable {
         let fm = FileManager.default
         try fm.createDirectory(at: directory, withIntermediateDirectories: true)
         if fm.fileExists(atPath: storeURL.path) {
-            if fm.fileExists(atPath: backupURL.path) { try fm.removeItem(at: backupURL) }
-            try fm.copyItem(at: storeURL, to: backupURL)
+            try Data(contentsOf: storeURL).write(to: backupURL, options: .atomic)
         }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         try encoder.encode(store).write(to: storeURL, options: .atomic)
     }
 
-    private func decode(_ url: URL) throws -> Store {
-        try JSONDecoder().decode(Store.self, from: Data(contentsOf: url))
+    /// Returns nil when the file is missing or is not valid store JSON. Other read errors propagate.
+    private func decodeIfValid(_ url: URL) throws -> Store? {
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        let data = try Data(contentsOf: url)
+        do {
+            return try JSONDecoder().decode(Store.self, from: data)
+        } catch is DecodingError {
+            return nil
+        }
     }
 }
