@@ -39,6 +39,20 @@ struct ProjectImporterTests {
         #expect(result.warnings == ["apps/cart/.env.local": [.invalidLine(line: 3)]])
     }
 
+    @Test func secretValueNeverReachesStoreJSON() throws {
+        let root = try TempDir.make()
+        try TempDir.write("A=1\nAPI_TOKEN=s3cret-value\n", to: ".env", in: root)
+        let envs = EnvEnvironment.defaults()
+        let project = try ProjectImporter(secrets: InMemorySecretStore()).makeProject(
+            name: "karaca", root: root, relativePaths: [".env"], environments: envs, importInto: envs[0].id
+        ).project
+
+        let json = String(decoding: try JSONEncoder().encode(Store(projects: [project])), as: UTF8.self)
+
+        #expect(json.contains("API_TOKEN"))
+        #expect(!json.contains("s3cret-value"))
+    }
+
     @Test func throwsWhenFileIsMissing() throws {
         let root = try TempDir.make()
         let envs = EnvEnvironment.defaults()

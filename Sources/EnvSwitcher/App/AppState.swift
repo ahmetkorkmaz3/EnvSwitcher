@@ -277,6 +277,10 @@ final class AppState {
         pendingDrift = nil
 
         if case .saveToCurrent(let environmentIdByTarget) = choice {
+            if let unchosen = pending.drifted.first(where: { environmentIdByTarget[$0.targetId] == nil }) {
+                Alerts.showError("\(unchosen.relativePath) için bir ortam seçilmedi. Hiçbir dosya yazılmadı.")
+                return true
+            }
             do {
                 let resolver = DriftResolver(secrets: secrets)
                 for drifted in pending.drifted {

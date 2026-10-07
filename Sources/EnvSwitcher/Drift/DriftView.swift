@@ -7,39 +7,46 @@ struct DriftView: View {
     @State private var environmentByTarget: [UUID: UUID] = [:]
 
     var body: some View {
-        if let pending = state.pendingDrift, let project = state.project(id: pending.projectId) {
-            VStack(alignment: .leading, spacing: 16) {
-                Label("Elle değiştirilmiş dosyalar var", systemImage: "exclamationmark.triangle.fill")
-                    .font(.headline)
-                    .symbolRenderingMode(.multicolor)
-                Text("Ortam değişmeden önce bu değişiklikler için bir seçim yapın. Değerler gösterilmez, yalnızca anahtarlar gösterilir.")
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+        Group {
+            if let pending = state.pendingDrift, let project = state.project(id: pending.projectId) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Label("Elle değiştirilmiş dosyalar var", systemImage: "exclamationmark.triangle.fill")
+                        .font(.headline)
+                        .symbolRenderingMode(.multicolor)
+                    Text("Ortam değişmeden önce bu değişiklikler için bir seçim yapın. Değerler gösterilmez, yalnızca anahtarlar gösterilir.")
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(pending.drifted, id: \.targetId) { drifted in
-                            DriftCard(drifted: drifted, project: project, environmentId: selection(for: drifted.targetId))
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(pending.drifted, id: \.targetId) { drifted in
+                                DriftCard(drifted: drifted, project: project, environmentId: selection(for: drifted.targetId))
+                            }
                         }
                     }
-                }
 
-                HStack {
-                    Spacer()
-                    Button("İptal", role: .cancel) { finish(.cancel) }
-                        .keyboardShortcut(.cancelAction)
-                    Button("At ve geç", role: .destructive) { finish(.discard) }
-                    Button("Mevcut ortama kaydet") { finish(.saveToCurrent(environmentIdByTarget: environmentByTarget)) }
-                        .keyboardShortcut(.defaultAction)
-                        .disabled(!pending.drifted.allSatisfy { environmentByTarget[$0.targetId] != nil })
+                    HStack {
+                        Spacer()
+                        Button("İptal", role: .cancel) { finish(.cancel) }
+                            .keyboardShortcut(.cancelAction)
+                        Button("At ve geç", role: .destructive) { finish(.discard) }
+                        Button("Mevcut ortama kaydet") { finish(.saveToCurrent(environmentIdByTarget: environmentByTarget)) }
+                            .keyboardShortcut(.defaultAction)
+                            .disabled(!pending.drifted.allSatisfy { environmentByTarget[$0.targetId] != nil })
+                    }
                 }
+                .padding(20)
+                .frame(width: 560, height: 480)
+                // Keyed by the review id: a fresh review in an open window starts with fresh choices.
+                .task(id: pending.id) { seed(pending, project: project) }
+            } else {
+                ContentUnavailableView("Bekleyen değişiklik yok", systemImage: "checkmark.circle")
+                    .frame(width: 400, height: 240)
             }
-            .padding(20)
-            .frame(width: 560, height: 480)
-            .onAppear { seed(pending, project: project) }
-        } else {
-            ContentUnavailableView("Bekleyen değişiklik yok", systemImage: "checkmark.circle")
-                .frame(width: 400, height: 240)
+        }
+        .onDisappear {
+            // Closing the window with the red button means cancel.
+            if state.pendingDrift != nil { state.resolveDrift(.cancel) }
         }
     }
 
@@ -60,9 +67,11 @@ struct DriftView: View {
         )
     }
 
+    /// The window stays open when the files changed while it was open. The view then shows the fresh drift.
     private func finish(_ choice: DriftChoice) {
-        dismissWindow(id: WindowID.drift)
-        state.resolveDrift(choice)
+        if state.resolveDrift(choice) {
+            dismissWindow(id: WindowID.drift)
+        }
     }
 }
 
