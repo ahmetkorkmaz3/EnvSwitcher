@@ -314,6 +314,8 @@ final class AppState {
             return "Şu dosyalar eski içeriğe dönemedi ve eski içerikleri kaydedilemedi: \(paths.joined(separator: ", ")). Bu dosyaları elle kontrol edin."
         case SwitchError.fileChanged(let paths):
             return "Şu dosyalar ortam değişirken değişti: \(paths.joined(separator: ", ")). Hiçbir dosya yazılmadı. Ortamı yeniden seçin."
+        case SwitchError.secretMissing(let path, let key):
+            return "\(path) dosyasındaki \(key) gizli değeri Keychain'de bulunamadı. Dosyalar değişmedi. Değeri düzenleme penceresinde yeniden girin."
         case SwitchError.unknownEnvironment, SwitchError.unknownTarget:
             return "Ortam veya dosya bulunamadı. Pencereyi kapatıp yeniden açın."
         case SecretStoreError.keychain(let status):

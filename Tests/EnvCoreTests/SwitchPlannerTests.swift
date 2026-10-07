@@ -42,6 +42,14 @@ struct SwitchPlannerTests {
         }
     }
 
+    @Test func prepareThrowsWhenASecretIsMissing() throws {
+        var f = try ProjectFixture()
+        f.setEntries([EnvEntry(key: "A", value: "1"), EnvEntry(key: "TOKEN", value: nil, isSecret: true)], target: f.cart, env: f.test)
+        #expect(throws: SwitchError.secretMissing(path: "apps/cart/.env.local", key: "TOKEN")) {
+            try SwitchPlanner(secrets: f.secrets).prepare(project: f.project, scope: .project, environmentId: f.test)
+        }
+    }
+
     @Test func prepareThrowsForUnknownEnvironmentOrTarget() throws {
         let f = try ProjectFixture()
         let planner = SwitchPlanner(secrets: f.secrets)

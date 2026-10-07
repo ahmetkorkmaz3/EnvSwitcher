@@ -15,6 +15,8 @@ public enum SwitchError: Error, Equatable {
     case recoveryFailed(paths: [String])
     /// These files changed on disk after preflight read them. Nothing was written.
     case fileChanged(paths: [String])
+    /// A secret entry has no value in the SecretStore. Nothing was written.
+    case secretMissing(path: String, key: String)
 }
 
 public struct DriftedTarget: Equatable, Sendable {
