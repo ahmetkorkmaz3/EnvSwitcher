@@ -26,10 +26,13 @@ enum DriftChoice {
 }
 
 struct PendingDrift {
+    let id = UUID()
     let projectId: UUID
     let scope: SwitchScope
     let environmentId: UUID
     let drifted: [DriftedTarget]
+    /// The file bytes preflight read. A commit goes ahead only when the files still match.
+    let observed: [UUID: Data?]
 }
 
 @MainActor
@@ -215,26 +218,53 @@ final class AppState {
                 return .stopped
             }
             if !preflight.drifted.isEmpty {
-                pendingDrift = PendingDrift(projectId: projectId, scope: scope, environmentId: environmentId, drifted: preflight.drifted)
+                pendingDrift = PendingDrift(projectId: projectId, scope: scope, environmentId: environmentId, drifted: preflight.drifted, observed: preflight.observed)
                 return .needsDriftReview
             }
-            return commitSwitch(projectId: projectId, scope: scope, environmentId: environmentId)
+            return commitSwitch(projectId: projectId, scope: scope, environmentId: environmentId, expectedContents: preflight.observed)
         } catch {
             report(error)
             return .stopped
         }
     }
 
-    func resolveDrift(_ choice: DriftChoice) {
-        guard let pending = pendingDrift else { return }
+    /// Returns true when the drift review is finished. Returns false when the files changed while
+    /// the window was open: `pendingDrift` then holds the fresh drift and the window must stay open.
+    @discardableResult
+    func resolveDrift(_ choice: DriftChoice) -> Bool {
+        guard let pending = pendingDrift else { return true }
+        if case .cancel = choice {
+            pendingDrift = nil
+            return true
+        }
+        guard var project = project(id: pending.projectId) else {
+            pendingDrift = nil
+            return true
+        }
+
+        // The window can stay open for a long time. Read the files again before anything is saved or written.
+        do {
+            let fresh = try planner.preflight(project: project, scope: pending.scope, environmentId: pending.environmentId)
+            guard fresh.missingDirectories.isEmpty else { throw SwitchError.directoryMissing(fresh.missingDirectories) }
+            if fresh.observed != pending.observed {
+                pendingDrift = PendingDrift(
+                    projectId: pending.projectId,
+                    scope: pending.scope,
+                    environmentId: pending.environmentId,
+                    drifted: fresh.drifted,
+                    observed: fresh.observed
+                )
+                Alerts.showInfo(title: "Dosyalar değişti", message: "Pencere açıkken bir veya daha fazla dosya değişti. Değişiklikleri yeniden gözden geçirin.")
+                return false
+            }
+        } catch {
+            pendingDrift = nil
+            report(error)
+            return true
+        }
         pendingDrift = nil
-        switch choice {
-        case .cancel:
-            return
-        case .discard:
-            break
-        case .saveToCurrent(let environmentIdByTarget):
-            guard var project = project(id: pending.projectId) else { return }
+
+        if case .saveToCurrent(let environmentIdByTarget) = choice {
             do {
                 let resolver = DriftResolver(secrets: secrets)
                 for drifted in pending.drifted {
@@ -244,17 +274,18 @@ final class AppState {
                 replace(project)
             } catch {
                 report(error)
-                return
+                return true
             }
         }
-        commitSwitch(projectId: pending.projectId, scope: pending.scope, environmentId: pending.environmentId)
+        commitSwitch(projectId: pending.projectId, scope: pending.scope, environmentId: pending.environmentId, expectedContents: pending.observed)
+        return true
     }
 
     @discardableResult
-    private func commitSwitch(projectId: UUID, scope: SwitchScope, environmentId: UUID) -> SwitchOutcome {
+    private func commitSwitch(projectId: UUID, scope: SwitchScope, environmentId: UUID, expectedContents: [UUID: Data?]) -> SwitchOutcome {
         guard let project = project(id: projectId) else { return .stopped }
         do {
-            let updated = try switchService.commit(project: project, scope: scope, environmentId: environmentId)
+            let updated = try switchService.commit(project: project, scope: scope, environmentId: environmentId, expectedContents: expectedContents)
             store.lastSwitchedProjectId = projectId
             replace(updated)
             refreshDrift()
@@ -281,6 +312,8 @@ final class AppState {
             return "Şu dosyalar eski içeriğe dönemedi: \(paths.joined(separator: ", ")). Eski içerikler şu klasörde: \(folder.path)"
         case SwitchError.recoveryFailed(let paths):
             return "Şu dosyalar eski içeriğe dönemedi ve eski içerikleri kaydedilemedi: \(paths.joined(separator: ", ")). Bu dosyaları elle kontrol edin."
+        case SwitchError.fileChanged(let paths):
+            return "Şu dosyalar ortam değişirken değişti: \(paths.joined(separator: ", ")). Hiçbir dosya yazılmadı. Ortamı yeniden seçin."
         case SwitchError.unknownEnvironment, SwitchError.unknownTarget:
             return "Ortam veya dosya bulunamadı. Pencereyi kapatıp yeniden açın."
         case SecretStoreError.keychain(let status):
