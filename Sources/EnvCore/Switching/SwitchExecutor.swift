@@ -12,8 +12,15 @@ public struct SwitchExecutor: Sendable {
     }
 
     /// Step 5: writes every file or none. Returns the SHA-256 hash of each written file by target id.
-    public func execute(_ writes: [PreparedWrite]) throws -> [UUID: String] {
+    /// A write whose target has an entry in `expectedContents` goes ahead only when the file on disk
+    /// still has those bytes (nil = missing). Otherwise nothing is written.
+    public func execute(_ writes: [PreparedWrite], expectedContents: [UUID: Data?] = [:]) throws -> [UUID: String] {
         let originals = try writes.map { try files.read($0.url) }
+        let changed = zip(writes, originals).filter { write, original in
+            guard let expected = expectedContents[write.targetId] else { return false }
+            return expected != original
+        }
+        guard changed.isEmpty else { throw SwitchError.fileChanged(paths: changed.map { $0.0.relativePath }) }
         for (index, write) in writes.enumerated() {
             do {
                 try files.write(write.data, to: write.url)

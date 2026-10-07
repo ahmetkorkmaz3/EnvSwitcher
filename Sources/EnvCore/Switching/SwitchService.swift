@@ -11,9 +11,10 @@ public struct SwitchService: Sendable {
 
     /// Steps 4–6: prepares the contents, writes the files, and returns the project
     /// with the new active environment and hash for each written target.
-    public func commit(project: Project, scope: SwitchScope, environmentId: UUID) throws -> Project {
+    /// `expectedContents` is the preflight `observed` map. A file that changed since then stops the commit.
+    public func commit(project: Project, scope: SwitchScope, environmentId: UUID, expectedContents: [UUID: Data?] = [:]) throws -> Project {
         let writes = try planner.prepare(project: project, scope: scope, environmentId: environmentId)
-        let hashes = try executor.execute(writes)
+        let hashes = try executor.execute(writes, expectedContents: expectedContents)
         var project = project
         for (targetId, hash) in hashes {
             guard let index = project.targetIndex(id: targetId) else { continue }

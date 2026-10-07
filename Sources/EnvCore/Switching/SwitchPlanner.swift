@@ -13,6 +13,8 @@ public enum SwitchError: Error, Equatable {
     case rollbackFailed(paths: [String], recoveryFolder: URL)
     /// The rollback failed and the old content of these files could not be saved anywhere.
     case recoveryFailed(paths: [String])
+    /// These files changed on disk after preflight read them. Nothing was written.
+    case fileChanged(paths: [String])
 }
 
 public struct DriftedTarget: Equatable, Sendable {
@@ -36,6 +38,8 @@ public struct SwitchPreflight: Equatable, Sendable {
     public var targetIds: [UUID]
     public var missingDirectories: [String]
     public var drifted: [DriftedTarget]
+    /// The bytes preflight read for each in-scope target whose folder exists. nil = the file was missing.
+    public var observed: [UUID: Data?]
 
     public var needsProtectedConfirmation: Bool { environment.isProtected }
 }
@@ -63,6 +67,7 @@ public struct SwitchPlanner: Sendable {
         let resolver = ValueResolver(secrets: secrets)
         var missing: [String] = []
         var drifted: [DriftedTarget] = []
+        var observed: [UUID: Data?] = [:]
 
         for target in targets {
             let url = project.url(for: target)
@@ -71,6 +76,7 @@ public struct SwitchPlanner: Sendable {
                 continue
             }
             let data = try files.read(url)
+            observed[target.id] = .some(data)
             let status = DriftDetector.status(fileData: data, lastWrittenHash: target.lastWrittenHash)
             guard status == .modified || status == .unmanaged, let data else { continue }
 
@@ -87,7 +93,7 @@ public struct SwitchPlanner: Sendable {
                 fileContents: text
             ))
         }
-        return SwitchPreflight(environment: environment, targetIds: targets.map(\.id), missingDirectories: missing, drifted: drifted)
+        return SwitchPreflight(environment: environment, targetIds: targets.map(\.id), missingDirectories: missing, drifted: drifted, observed: observed)
     }
 
     /// Step 4: builds the new file contents in memory. Writes nothing to disk.

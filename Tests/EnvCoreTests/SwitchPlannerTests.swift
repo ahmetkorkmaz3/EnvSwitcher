@@ -115,4 +115,11 @@ struct SwitchPlannerTests {
         let result = try SwitchPlanner(secrets: f.secrets).preflight(project: f.project, scope: .target(f.shell.id), environmentId: f.test)
         #expect(result.targetIds == [f.shell.id])
     }
+
+    @Test func preflightReturnsObservedFileContents() throws {
+        let f = try ProjectFixture()
+        try TempDir.write("A=1\n", to: "apps/cart/.env.local", in: f.root)
+        let result = try SwitchPlanner(secrets: f.secrets).preflight(project: f.project, scope: .project, environmentId: f.test)
+        #expect(result.observed == [f.cart.id: Data("A=1\n".utf8), f.shell.id: Optional<Data>.none])
+    }
 }

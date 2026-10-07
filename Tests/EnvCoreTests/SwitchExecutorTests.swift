@@ -86,4 +86,24 @@ struct SwitchExecutorTests {
         let recoveryFile = folder.appendingPathComponent("apps__a__.env.local")
         #expect(!FileManager.default.fileExists(atPath: recoveryFile.path))
     }
+
+    @Test func refusesToWriteWhenAFileChangedSincePreflight() throws {
+        let files = FakeFileWriter()
+        files.contents = [a: Data("A=old".utf8)]
+        let expected: [UUID: Data?] = [idA: Data("A=seen".utf8)]
+        #expect(throws: SwitchError.fileChanged(paths: ["apps/a/.env.local"])) {
+            try SwitchExecutor(files: files, recoveryDirectory: try TempDir.make()).execute(writes(), expectedContents: expected)
+        }
+        #expect(files.contents == [a: Data("A=old".utf8)])
+    }
+
+    @Test func refusesToWriteWhenAFileAppearedSincePreflight() throws {
+        let files = FakeFileWriter()
+        files.contents = [b: Data("B=new file".utf8)]
+        let expected: [UUID: Data?] = [idA: nil, idB: nil]
+        #expect(throws: SwitchError.fileChanged(paths: ["apps/b/.env.local"])) {
+            try SwitchExecutor(files: files, recoveryDirectory: try TempDir.make()).execute(writes(), expectedContents: expected)
+        }
+        #expect(files.contents == [b: Data("B=new file".utf8)])
+    }
 }
