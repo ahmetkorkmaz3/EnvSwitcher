@@ -13,5 +13,11 @@ struct EnvSwitcherApp: App {
             Text(state.menuBarTitle)
         }
         .menuBarExtraStyle(.menu)
+
+        Window("Değişiklikler", id: WindowID.drift) {
+            DriftView()
+                .environment(state)
+        }
+        .windowResizability(.contentSize)
     }
 }
