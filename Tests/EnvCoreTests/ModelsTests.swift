@@ -9,8 +9,8 @@ struct ModelsTests {
         Project(name: "p", rootPath: "/tmp/p", environments: envs, targets: targets)
     }
 
-    @Test func defaultsMarkOnlyCanliAsProtected() {
-        #expect(envs.map(\.name) == ["local", "test", "canli"])
+    @Test func defaultsMarkOnlyProdAsProtected() {
+        #expect(envs.map(\.name) == ["local", "test", "prod"])
         #expect(envs.map(\.isProtected) == [false, false, true])
         #expect(envs.map(\.color) == [.green, .orange, .red])
     }

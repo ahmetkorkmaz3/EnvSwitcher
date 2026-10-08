@@ -101,7 +101,7 @@
 "Drag a folder here or choose one. The app finds the .env files." = "Bir klasörü buraya sürükleyin veya seçin. Uygulama .env dosyalarını otomatik bulur.";
 "This folder is already in the project %@. Choose a different folder." = "Bu klasör zaten %@ projesinde. Başka bir klasör seçin.";
 "This folder has no .env files." = "Bu klasörde .env dosyası bulunamadı.";
-"Git tracks these files. Values from canli can get into a commit: %@" = "Bu dosyalar git tarafından izleniyor. canli değerler commit'e girebilir: %@";
+"Git tracks these files. Values from prod can get into a commit: %@" = "Bu dosyalar git tarafından izleniyor. prod değerleri commit'e girebilir: %@";
 "No folder selected" = "Klasör seçilmedi";
 "Change…" = "Değiştir…";
 "Files Found (%lld)" = "Bulunan dosyalar (%lld)";

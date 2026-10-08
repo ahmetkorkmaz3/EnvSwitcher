@@ -18,10 +18,10 @@ struct EnvComparerTests {
         f.setEntries([
             EnvEntry(key: "A", value: "1"),
             EnvEntry(key: "TOKEN", value: nil, isSecret: true),
-        ], target: f.cart, env: f.canli)
+        ], target: f.cart, env: f.prod)
         try f.secrets.write("t-local", account: f.account(f.cart, f.local, "TOKEN"))
         try f.secrets.write("t-test", account: f.account(f.cart, f.test, "TOKEN"))
-        try f.secrets.write("t-canli", account: f.account(f.cart, f.canli, "TOKEN"))
+        try f.secrets.write("t-prod", account: f.account(f.cart, f.prod, "TOKEN"))
         return f
     }
 
@@ -30,10 +30,10 @@ struct EnvComparerTests {
         let rows = try EnvComparer(secrets: f.secrets).compare(project: f.project, targetId: f.cart.id)
 
         #expect(rows.map(\.key) == ["A", "TOKEN", "ONLY_LOCAL", "ONLY_TEST"])
-        #expect(rows[0] == ComparisonRow(key: "A", values: [f.local: "1", f.test: "1", f.canli: "1"], isSecret: false, status: .same))
+        #expect(rows[0] == ComparisonRow(key: "A", values: [f.local: "1", f.test: "1", f.prod: "1"], isSecret: false, status: .same))
         #expect(rows[1] == ComparisonRow(
             key: "TOKEN",
-            values: [f.local: "t-local", f.test: "t-test", f.canli: "t-canli"],
+            values: [f.local: "t-local", f.test: "t-test", f.prod: "t-prod"],
             isSecret: true,
             status: .different
         ))
@@ -44,7 +44,7 @@ struct EnvComparerTests {
 
     @Test func emptyValueIsDifferentFromAFilledOne() throws {
         var f = try ProjectFixture()
-        for env in [f.local, f.test, f.canli] {
+        for env in [f.local, f.test, f.prod] {
             f.setEntries([EnvEntry(key: "A", value: env == f.test ? "" : "1")], target: f.cart, env: env)
         }
         let rows = try EnvComparer(secrets: f.secrets).compare(project: f.project, targetId: f.cart.id)
@@ -62,7 +62,7 @@ struct EnvComparerTests {
         let f = try fixture()
         let target = f.project.targets[0]
         #expect(EnvComparer.missingKeys(in: f.local, target: target, project: f.project) == ["ONLY_TEST"])
-        #expect(EnvComparer.missingKeys(in: f.canli, target: target, project: f.project) == ["ONLY_LOCAL", "ONLY_TEST"])
+        #expect(EnvComparer.missingKeys(in: f.prod, target: target, project: f.project) == ["ONLY_LOCAL", "ONLY_TEST"])
     }
 
     @Test func fillMissingFromFirstAvailableAddsEveryMissingKey() throws {
@@ -74,9 +74,9 @@ struct EnvComparerTests {
         #expect(result.skipped.isEmpty)
         let after = try EnvComparer(secrets: f.secrets).compare(project: result.project, targetId: f.cart.id)
         #expect(after.allSatisfy { $0.status != .missing })
-        #expect(after[2].values == [f.local: "x", f.test: "x", f.canli: "x"])
-        #expect(after[3].values == [f.local: "y", f.test: "y", f.canli: "y"])
-        #expect(after[1].values == [f.local: "t-local", f.test: "t-test", f.canli: "t-canli"])
+        #expect(after[2].values == [f.local: "x", f.test: "x", f.prod: "x"])
+        #expect(after[3].values == [f.local: "y", f.test: "y", f.prod: "y"])
+        #expect(after[1].values == [f.local: "t-local", f.test: "t-test", f.prod: "t-prod"])
     }
 
     @Test func fillMissingFromOneEnvironmentSkipsKeysItDoesNotHave() throws {
@@ -88,7 +88,7 @@ struct EnvComparerTests {
 
         #expect(result.filled.contains("SECRET_KEY"))
         #expect(result.skipped == ["ONLY_TEST"])
-        #expect(result.project.targets[0].entries(for: f.canli).last == EnvEntry(key: "SECRET_KEY", value: nil, isSecret: true))
-        #expect(try f.secrets.read(account: f.account(f.cart, f.canli, "SECRET_KEY")) == "s")
+        #expect(result.project.targets[0].entries(for: f.prod).last == EnvEntry(key: "SECRET_KEY", value: nil, isSecret: true))
+        #expect(try f.secrets.read(account: f.account(f.cart, f.prod, "SECRET_KEY")) == "s")
     }
 }

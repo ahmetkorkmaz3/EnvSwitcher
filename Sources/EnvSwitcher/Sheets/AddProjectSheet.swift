@@ -36,7 +36,7 @@ struct AddProjectSheet: View {
             }
             if !trackedFiles.isEmpty {
                 Label(
-                    "Git tracks these files. Values from canli can get into a commit: \(trackedFiles.joined(separator: ", "))",
+                    "Git tracks these files. Values from prod can get into a commit: \(trackedFiles.joined(separator: ", "))",
                     systemImage: "exclamationmark.triangle.fill"
                 )
                 .symbolRenderingMode(.multicolor)

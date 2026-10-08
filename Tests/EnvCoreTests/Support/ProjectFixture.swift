@@ -23,7 +23,7 @@ struct ProjectFixture {
 
     var local: UUID { envs[0].id }
     var test: UUID { envs[1].id }
-    var canli: UUID { envs[2].id }
+    var prod: UUID { envs[2].id }
     var cart: EnvTarget { project.targets[0] }
     var shell: EnvTarget { project.targets[1] }
 

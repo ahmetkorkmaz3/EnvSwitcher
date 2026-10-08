@@ -28,8 +28,8 @@ struct SwitchServiceTests {
 
     @Test func targetScopeChangesOnlyOneFile() throws {
         let f = try ProjectFixture()
-        let updated = try service(f).commit(project: f.project, scope: .target(f.shell.id), environmentId: f.canli)
-        #expect(updated.targets.map(\.activeEnvironmentId) == [nil, f.canli])
+        let updated = try service(f).commit(project: f.project, scope: .target(f.shell.id), environmentId: f.prod)
+        #expect(updated.targets.map(\.activeEnvironmentId) == [nil, f.prod])
         #expect(!FileManager.default.fileExists(atPath: f.root.appendingPathComponent("apps/cart/.env.local").path))
     }
 

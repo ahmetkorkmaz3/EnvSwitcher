@@ -21,7 +21,7 @@ scripts/bundle.sh && open build/EnvSwitcher.app
 4. Menüden projeyi açın, "Tüm dosyalar → test" seçin.
    - Beklenen: 9 dosyanın hepsi yeniden yazılır. `apps/cart/.env.local` içinde `NEXT_PUBLIC_APP_ENV=test` var.
    - Beklenen: menü çubuğu `karaca-copy · test` gösterir.
-5. Menüden "Dosyalar → apps/checkout/.env.local → canli" seçin.
+5. Menüden "Dosyalar → apps/checkout/.env.local → prod" seçin.
    - Beklenen: Korumalı ortam onayı çıkar: "1 dosya değişecek." "Geç" düğmesine basın.
    - Beklenen: menü çubuğu `karaca-copy · karışık` gösterir.
 6. Menüden "Tüm dosyalar → local" seçin.
@@ -65,14 +65,14 @@ scripts/bundle.sh && open build/EnvSwitcher.app
 ## 6. Ortam karşılaştırma
 
 1. `apps/cart/.env.local` dosyasını seçin ve **Karşılaştır** görünümüne geçin.
-   - Beklenen: her anahtar bir satırda, `local`, `test`, `canli` değerleri yan yana görünür.
-   - Beklenen: `test` ve `canli` boşsa tüm satırlar kırmızı işaretle "eksik" gösterir.
+   - Beklenen: her anahtar bir satırda, `local`, `test`, `prod` değerleri yan yana görünür.
+   - Beklenen: `test` ve `prod` boşsa tüm satırlar kırmızı işaretle "eksik" gösterir.
 2. Bir satırda **Eksiklere kopyala → local değerini kopyala** seçin.
-   - Beklenen: değer `test` ve `canli` hücrelerine yazılır. İşaret gri olur.
+   - Beklenen: değer `test` ve `prod` hücrelerine yazılır. İşaret gri olur.
 3. `test` hücresindeki değeri değiştirip Return tuşuna basın.
    - Beklenen: satır turuncu "farklı" işaretini alır. **Farklı** filtresinde görünür.
-4. Boş bir `canli` hücresine değer yazın ve başka bir hücreye tıklayın.
-   - Beklenen: anahtar `canli` ortamına eklenir.
+4. Boş bir `prod` hücresine değer yazın ve başka bir hücreye tıklayın.
+   - Beklenen: anahtar `prod` ortamına eklenir.
 5. Gizli bir anahtarı eksik bir ortama kopyalayın.
    - Beklenen: yeni değer de gizli olur. `store.json` içinde değer görünmez.
 6. Birkaç anahtarı yalnızca `local` ortamına, birini yalnızca `test` ortamına ekleyin. Üst çubukta **Tüm eksiklere kopyala → Her anahtar için ilk dolu ortamdan** seçin ve **Ekle** düğmesine basın.
