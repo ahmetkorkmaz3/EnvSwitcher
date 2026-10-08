@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EnvSwitcher — .env ortamlarını tek tıkla değiştirin</title>
+  <meta name="description" content="EnvSwitcher, bir projedeki .env dosyalarını local, test ve canli ortamları arasında değiştiren bir macOS menü çubuğu uygulamasıdır. Gizli değerler Keychain içinde durur.">
+  <meta property="og:title" content="EnvSwitcher">
+  <meta property="og:description" content=".env dosyalarını ortamlar arasında tek tıkla değiştiren macOS menü çubuğu uygulaması.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --bg-alt: #eef1f7;
+      --surface: #ffffff;
+      --text: #12151c;
+      --muted: #5a6273;
+      --border: #dde2ec;
+      --accent: #2563eb;
+      --accent-2: #3d99fa;
+      --code-bg: #0f1420;
+      --code-text: #e6ebf5;
+      --green: #22a55b;
+      --orange: #f08c1a;
+      --red: #e5484d;
+      --shadow: 0 20px 50px -20px rgba(18, 30, 60, .25);
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0b0e14;
+        --bg-alt: #11151e;
+        --surface: #161b26;
+        --text: #e8ecf4;
+        --muted: #98a2b5;
+        --border: #262d3b;
+        --accent: #5ea2ff;
+        --accent-2: #3d99fa;
+        --code-bg: #070a10;
+        --shadow: 0 20px 50px -20px rgba(0, 0, 0, .7);
+        color-scheme: dark;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b0e14;
+      --bg-alt: #11151e;
+      --surface: #161b26;
+      --text: #e8ecf4;
+      --muted: #98a2b5;
+      --border: #262d3b;
+      --accent: #5ea2ff;
+      --accent-2: #3d99fa;
+      --code-bg: #070a10;
+      --shadow: 0 20px 50px -20px rgba(0, 0, 0, .7);
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; }
+    code { font-size: .9em; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 6px; padding: .1em .4em; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+    /* Navigation */
+    nav { position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); background: color-mix(in srgb, var(--bg) 80%, transparent); border-bottom: 1px solid var(--border); }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); }
+    .brand img { width: 28px; height: 28px; }
+    .brand:hover { text-decoration: none; }
+    .nav-links { display: flex; gap: 22px; font-size: 14px; }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    @media (max-width: 640px) { .nav-links .hide-sm { display: none; } }
+
+    /* Hero */
+    .hero { padding: 72px 0 56px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content: ""; position: absolute; inset: -40% -20% auto; height: 520px; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent); pointer-events: none; }
+    .hero > .wrap { position: relative; }
+    .hero-icon { width: 104px; height: 104px; filter: drop-shadow(0 14px 28px rgba(37, 99, 235, .35)); }
+    h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.08; letter-spacing: -.02em; margin: 20px 0 16px; }
+    h1 .grad { background: linear-gradient(90deg, var(--accent-2), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { font-size: clamp(17px, 2.2vw, 20px); color: var(--muted); max-width: 660px; margin: 0 auto 32px; }
+    .badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 18px; font-size: 13px; color: var(--muted); }
+    .badges span { border: 1px solid var(--border); background: var(--surface); padding: 4px 10px; border-radius: 999px; }
+
+    /* Install command */
+    .install { display: flex; align-items: center; gap: 8px; max-width: 760px; margin: 0 auto; background: var(--code-bg); color: var(--code-text); border-radius: 12px; padding: 8px 8px 8px 18px; box-shadow: var(--shadow); text-align: left; }
+    .install pre { margin: 0; flex: 1; overflow-x: auto; font-size: 14px; white-space: pre; scrollbar-width: none; }
+    .install pre::-webkit-scrollbar { display: none; }
+    .install .prompt { color: #6b7790; user-select: none; }
+    .copy { flex: none; border: 0; border-radius: 8px; padding: 9px 14px; font: 600 13px/1 inherit; font-family: inherit; cursor: pointer; background: var(--accent-2); color: #fff; }
+    .copy:hover { filter: brightness(1.08); }
+    .copy:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 22px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 15px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+    .btn:hover { text-decoration: none; border-color: var(--accent); }
+    .btn svg { width: 18px; height: 18px; }
+
+    /* Menu bar mock */
+    .demo { margin: 64px auto 0; max-width: 760px; }
+    .screen { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); background: linear-gradient(160deg, #3d99fa 0%, #1c51cc 55%, #142f7a 100%); text-align: left; }
+    .menubar { display: flex; justify-content: flex-end; align-items: center; gap: 18px; height: 30px; padding: 0 14px; font-size: 13px; color: #fff; background: rgba(255, 255, 255, .18); backdrop-filter: blur(10px); }
+    .menubar .item { padding: 2px 8px; border-radius: 5px; }
+    .menubar .item.active { background: rgba(255, 255, 255, .28); }
+    .desk { position: relative; height: 340px; }
+    .menu { position: absolute; right: 70px; top: 6px; width: 290px; padding: 5px; border-radius: 10px; font-size: 13px; color: #1d1f24; background: rgba(246, 246, 248, .92); backdrop-filter: blur(20px); box-shadow: 0 12px 40px rgba(0, 0, 0, .35); border: 1px solid rgba(255, 255, 255, .5); }
+    .menu .row { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 5px; }
+    .menu .row.hl { background: #2f7bf5; color: #fff; }
+    .menu .row .chev { margin-left: auto; opacity: .6; }
+    .menu .sep { height: 1px; background: rgba(0, 0, 0, .1); margin: 5px 8px; }
+    .menu .label { padding: 4px 10px; font-size: 11px; font-weight: 600; color: #8a8d95; }
+    .menu .kbd { margin-left: auto; color: #8a8d95; }
+    .sub { position: absolute; right: 362px; top: 34px; width: 210px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+    .dot.green { background: var(--green); }
+    .dot.orange { background: var(--orange); }
+    .dot.red { background: var(--red); }
+    .check { width: 12px; flex: none; text-align: center; }
+    .lock { margin-left: auto; opacity: .7; }
+    @media (max-width: 760px) {
+      .desk { height: 500px; }
+      .menu { right: 12px; width: min(290px, calc(100% - 24px)); }
+      .sub { right: auto; left: 12px; top: 230px; width: 220px; }
+    }
+
+    /* Sections */
+    section { padding: 80px 0; }
+    section.alt { background: var(--bg-alt); border-block: 1px solid var(--border); }
+    .eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; font-weight: 700; color: var(--accent); }
+    h2 { font-size: clamp(26px, 4vw, 38px); line-height: 1.15; letter-spacing: -.015em; margin: 8px 0 14px; }
+    .section-lead { color: var(--muted); max-width: 640px; margin: 0 0 40px; font-size: 17px; }
+
+    .grid { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 580px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+    .card h3 { margin: 12px 0 6px; font-size: 17px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    .ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent-2) 15%, transparent); color: var(--accent); }
+    .ico svg { width: 22px; height: 22px; }
+
+    /* Steps */
+    .steps { counter-reset: step; display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); list-style: none; padding: 0; margin: 0; }
+    .steps li { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 22px 22px 66px; }
+    .steps li::before { counter-increment: step; content: counter(step); position: absolute; left: 20px; top: 20px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--accent-2), var(--accent)); }
+    .steps h3 { margin: 4px 0 6px; font-size: 16px; }
+    .steps p { margin: 0; color: var(--muted); font-size: 15px; }
+
+    /* Compare mock */
+    .split { display: grid; gap: 40px; grid-template-columns: 1fr 1.35fr; align-items: center; }
+    @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+    .list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    .list li { display: flex; gap: 12px; }
+    .list li::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 9px; border-radius: 50%; background: var(--accent); }
+    .list b { display: block; }
+    .list span { color: var(--muted); font-size: 15px; }
+    .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+    .table-head { display: flex; gap: 8px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+    .table-head .file { font-family: "SF Mono", ui-monospace, Menlo, monospace; color: var(--text); }
+    .table-head .pill { margin-left: auto; font-size: 12px; border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; }
+    .scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 420px; }
+    th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    th { font-weight: 600; color: var(--muted); font-size: 12px; }
+    th .dot { display: inline-block; margin-right: 6px; vertical-align: middle; }
+    td.key { font-family: "SF Mono", ui-monospace, Menlo, monospace; display: flex; align-items: center; gap: 8px; }
+    td.val { font-family: "SF Mono", ui-monospace, Menlo, monospace; color: var(--muted); }
+    td.missing { color: var(--red); font-style: italic; font-family: inherit; }
+    tr:last-child td { border-bottom: 0; }
+    .mark { width: 4px; height: 16px; border-radius: 2px; flex: none; }
+    .mark.red { background: var(--red); }
+    .mark.orange { background: var(--orange); }
+    .mark.gray { background: #9aa3b2; }
+
+    /* Install section */
+    .code { background: var(--code-bg); color: var(--code-text); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font-size: 14px; margin: 0; }
+    .code .c { color: #6b7790; }
+    details { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-top: 12px; }
+    details summary { cursor: pointer; font-weight: 600; }
+    details[open] summary { margin-bottom: 10px; }
+    details ol { margin: 0; padding-left: 20px; color: var(--muted); }
+    details p { color: var(--muted); margin: 8px 0 0; }
+
+    footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--border); }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+    footer nav { position: static; background: none; border: 0; backdrop-filter: none; display: flex; gap: 18px; }
+    footer a { color: var(--muted); }
+
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+<nav aria-label="Ana menü">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="icon.png" alt="" width="28" height="28">EnvSwitcher</a>
+    <div class="nav-links">
+      <a class="hide-sm" href="#ozellikler">Özellikler</a>
+      <a class="hide-sm" href="#guvenlik">Güvenlik</a>
+      <a href="#kurulum">Kurulum</a>
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<main id="top">
+  <header class="hero">
+    <div class="wrap">
+      <img class="hero-icon" src="icon.png" alt="EnvSwitcher uygulama ikonu" width="104" height="104">
+      <h1><code style="all: unset">.env</code> ortamlarını<br><span class="grad">tek tıkla değiştirin.</span></h1>
+      <p class="lead">EnvSwitcher bir macOS menü çubuğu uygulamasıdır. Değerleri bir kez girin. <code>local</code>, <code>test</code> veya <code>canli</code> seçin. Uygulama projedeki tüm <code>.env</code> dosyalarını yeniden yazar.</p>
+
+      <div class="install">
+        <pre aria-label="Kurulum komutu"><span class="prompt">$ </span><span id="cmd">curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh</span></pre>
+        <button class="copy" type="button" data-copy="cmd">Kopyala</button>
+      </div>
+      <div class="badges">
+        <span>macOS 14 ve üstü</span>
+        <span>Apple Silicon ve Intel</span>
+        <span>Ücretsiz, MIT lisansı</span>
+      </div>
+      <div class="actions">
+        <a class="btn" href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+          Son sürümü indir
+        </a>
+        <a class="btn" href="https://github.com/ahmetkorkmaz3/EnvSwitcher">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+          Kaynak kodu
+        </a>
+      </div>
+
+      <div class="demo" aria-label="Menü çubuğu örneği">
+        <div class="screen">
+          <div class="menubar">
+            <span class="item active">karaca · test</span>
+            <span>Prş 8 Eki 14:20</span>
+          </div>
+          <div class="desk">
+            <div class="menu">
+              <div class="row hl"><span class="dot orange"></span>karaca<span class="chev">›</span></div>
+              <div class="row"><span class="dot green"></span>api-server<span class="chev">›</span></div>
+              <div class="sep"></div>
+              <div class="row">Proje Ekle…<span class="kbd">⌘N</span></div>
+              <div class="row">Yönet…<span class="kbd">⌘M</span></div>
+              <div class="row">Ayarlar…<span class="kbd">⌘,</span></div>
+              <div class="sep"></div>
+              <div class="row">Çık<span class="kbd">⌘Q</span></div>
+              <div class="label">Sürüm 0.2.0</div>
+            </div>
+            <div class="menu sub">
+              <div class="label">Tüm dosyalar</div>
+              <div class="row"><span class="check"></span><span class="dot green"></span>local</div>
+              <div class="row hl"><span class="check">✓</span><span class="dot orange"></span>test</div>
+              <div class="row"><span class="check"></span><span class="dot red"></span>canli<span class="lock">🔒</span></div>
+              <div class="sep"></div>
+              <div class="label">Dosyalar</div>
+              <div class="row">apps/cart/.env.local<span class="chev">›</span></div>
+              <div class="row">apps/web/.env.local<span class="chev">›</span></div>
+              <div class="row">packages/api/.env<span class="chev">›</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="ozellikler" class="alt">
+    <div class="wrap">
+      <div class="eyebrow">Özellikler</div>
+      <h2>Dosyaları elle düzenlemeyi bırakın.</h2>
+      <p class="section-lead">Her ortamın değerleri uygulamada durur. Ortam değiştirmek bir menü tıklamasıdır.</p>
+      <div class="grid">
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></div>
+          <h3>Tek tıkla geçiş</h3>
+          <p>Menü çubuğundan bir ortam seçin. Projedeki dosyalar o ortamın değerleri ile yazılır.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+          <h3>Monorepo desteği</h3>
+          <p>Uygulama klasörü tarar ve tüm <code>.env</code> dosyalarını bulur. Dosyalar birlikte veya tek tek değişir.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+          <h3>Gizli değerler Keychain içinde</h3>
+          <p>Token, şifre ve anahtarlar macOS Keychain içinde durur. Diskteki ayar dosyasına girmez.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 8h4M5 12h4M15 12h4M15 16h4"/></svg></div>
+          <h3>Ortamları karşılaştırma</h3>
+          <p>Bir dosyanın değerleri yan yana görünür. Eksik anahtarları tek tıkla diğer ortamlara kopyalayın.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg></div>
+          <h3>Panodan yapıştırma</h3>
+          <p><code>KEY=değer</code> satırlarını kopyalayın ve bir ortama yapıştırın. Gizli görünen anahtarlar Keychain'e gider.</p>
+        </div>
+        <div class="card">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></div>
+          <h3>Kolay güncelleme</h3>
+          <p>Yeni bir sürüm çıkınca menüde bir satır görünür. Kurulum komutu aynı zamanda güncelleme komutudur.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="nasil">
+    <div class="wrap">
+      <div class="eyebrow">Nasıl çalışır</div>
+      <h2>Üç adımda başlayın.</h2>
+      <p class="section-lead">İlk kurulum yaklaşık 2 dakika sürer.</p>
+      <ol class="steps">
+        <li>
+          <h3>Projeyi ekleyin</h3>
+          <p>Menüden <b>Proje Ekle…</b> seçin. Klasörü seçin veya pencereye sürükleyin.</p>
+        </li>
+        <li>
+          <h3>Değerleri aktarın</h3>
+          <p>Bulunan dosyaları kontrol edin. Mevcut içerik <code>local</code> ortamına aktarılır.</p>
+        </li>
+        <li>
+          <h3>Ortamı seçin</h3>
+          <p><code>test</code> değerlerini girin. Menüden proje → <b>Tüm dosyalar → test</b> seçin.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap split">
+      <div>
+        <div class="eyebrow">Karşılaştırma</div>
+        <h2>Eksik anahtarı canlıya çıkmadan görün.</h2>
+        <p class="section-lead" style="margin-bottom: 24px">Her anahtar bir satırda durur. Satırın rengi durumu gösterir.</p>
+        <ul class="list">
+          <li><div><b>Kırmızı: bir ortamda eksik</b><span>Hücreye bir değer yazın veya başka bir ortamdan kopyalayın.</span></div></li>
+          <li><div><b>Turuncu: değerler farklı</b><span>Ortama özel değerleri bir bakışta kontrol edin.</span></div></li>
+          <li><div><b>Gri: tüm ortamlarda aynı</b><span>Filtre ile bu satırları gizleyin.</span></div></li>
+        </ul>
+      </div>
+      <div class="table-card" aria-label="Karşılaştırma görünümü örneği">
+        <div class="table-head"><span class="file">apps/cart/.env.local</span><span class="pill">Karşılaştır</span></div>
+        <div class="scroll">
+          <table>
+            <thead>
+              <tr><th>Anahtar</th><th><span class="dot green"></span>local</th><th><span class="dot orange"></span>test</th><th><span class="dot red"></span>canli</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="key"><span class="mark orange"></span>APP_ENV</td><td class="val">local</td><td class="val">test</td><td class="val">canli</td></tr>
+              <tr><td class="key"><span class="mark orange"></span>API_URL</td><td class="val">localhost:4000</td><td class="val">test.api.app</td><td class="val">api.app</td></tr>
+              <tr><td class="key"><span class="mark red"></span>STRIPE_SECRET_KEY</td><td class="val">••••</td><td class="val">••••</td><td class="val missing">eksik</td></tr>
+              <tr><td class="key"><span class="mark red"></span>SENTRY_DSN</td><td class="val missing">eksik</td><td class="val">••••</td><td class="val">••••</td></tr>
+              <tr><td class="key"><span class="mark gray"></span>LOG_LEVEL</td><td class="val">info</td><td class="val">info</td><td class="val">info</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="guvenlik">
+    <div class="wrap">
+      <div class="eyebrow">Güvenlik</div>
+      <h2>Dosyalarınız güvende kalır.</h2>
+      <p class="section-lead">Uygulama yazmadan önce kontrol eder. Bir hata olursa eski içeriğe döner.</p>
+      <div class="grid">
+        <div class="card">
+          <h3>Elle değişiklik kontrolü</h3>
+          <p>Bir dosyayı editörde değiştirdiyseniz, uygulama farkı gösterir. Değişikliği kaydedin, atın veya iptal edin.</p>
+        </div>
+        <div class="card">
+          <h3>Ya hep ya hiç yazma</h3>
+          <p>Bir dosya yazılamazsa, yazılan dosyalar eski içeriğe döner.</p>
+        </div>
+        <div class="card">
+          <h3>Korumalı ortam</h3>
+          <p><code>canli</code> gibi korumalı bir ortama geçmeden önce uygulama onay ister.</p>
+        </div>
+        <div class="card">
+          <h3>Boş ortam uyarısı</h3>
+          <p>Seçilen ortamda bir dosya için değer yoksa uygulama sorar. Dosyalar yanlışlıkla boşalmaz.</p>
+        </div>
+        <div class="card">
+          <h3>İzinler korunur</h3>
+          <p>Dosya izinleri (örnek <code>600</code>) değişmez. Sembolik bağlantının hedefine yazılır.</p>
+        </div>
+        <div class="card">
+          <h3>Git uyarısı</h3>
+          <p>Bir <code>.env</code> dosyası <code>.gitignore</code> içinde değilse, proje eklerken uyarı çıkar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kurulum" class="alt">
+    <div class="wrap">
+      <div class="eyebrow">Kurulum</div>
+      <h2>Tek komutla kurun.</h2>
+      <p class="section-lead">Komut son sürümü indirir, SHA-256 değerini kontrol eder, <code>/Applications</code> içine kurar ve uygulamayı açar.</p>
+      <pre class="code"><span class="c"># Kurulum ve güncelleme</span>
+curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
+
+<span class="c"># Belirli bir sürüm</span>
+curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh</pre>
+
+      <details>
+        <summary>Elle kurulum</summary>
+        <ol>
+          <li><a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest">Releases</a> sayfasından <code>EnvSwitcher-X.Y.Z.zip</code> dosyasını indirin.</li>
+          <li>Zip dosyasını açın. <code>EnvSwitcher.app</code> dosyasını <code>/Applications</code> içine taşıyın.</li>
+          <li>Uygulamayı açın. macOS "Apple doğrulayamadı" uyarısını gösterir. <b>Bitti</b> düğmesine basın.</li>
+          <li>Sistem Ayarları → Gizlilik ve Güvenlik sayfasını açın. <b>Yine de Aç</b> düğmesine basın.</li>
+        </ol>
+        <p>Uygulama notarize edilmedi. Bu nedenle tarayıcıdan indirilen dosyada bu uyarı çıkar. Kurulum komutu bu uyarıyı göstermez.</p>
+      </details>
+
+      <details>
+        <summary>Kaldırma</summary>
+        <pre class="code">osascript -e 'quit app "EnvSwitcher"'
+rm -rf /Applications/EnvSwitcher.app
+rm -rf ~/Library/Application\ Support/EnvSwitcher
+security delete-generic-password -s EnvSwitcher -a vault
+defaults delete com.ahmetkorkmaz.envswitcher</pre>
+        <p>Bu komutlar <code>.env</code> dosyalarınızı değiştirmez.</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>EnvSwitcher · MIT lisansı</span>
+    <nav aria-label="Alt menü">
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher">GitHub</a>
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases">Sürümler</a>
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/blob/main/CHANGELOG.md">Değişiklikler</a>
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/blob/main/CONTRIBUTING.md">Katkı</a>
+    </nav>
+  </div>
+</footer>
+
+<p class="sr-only" aria-live="polite" id="status"></p>
+
+<script>
+  document.querySelectorAll("[data-copy]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var text = document.getElementById(button.dataset.copy).textContent;
+      var done = function () {
+        button.textContent = "Kopyalandı";
+        document.getElementById("status").textContent = "Komut panoya kopyalandı.";
+        setTimeout(function () { button.textContent = "Kopyala"; }, 1800);
+      };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      }
+    });
+  });
+</script>
+</body>
+</html>

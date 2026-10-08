@@ -1,4 +1,15 @@
-# EnvSwitcher
+<p align="center"><img src="site/icon.png" alt="EnvSwitcher ikonu" width="96" height="96"></p>
+
+<h1 align="center">EnvSwitcher</h1>
+
+<p align="center">
+  <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest"><img src="https://img.shields.io/github/v/release/ahmetkorkmaz3/EnvSwitcher" alt="Son sürüm"></a>
+  <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/actions/workflows/ci.yml"><img src="https://github.com/ahmetkorkmaz3/EnvSwitcher/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-blue" alt="macOS 14 ve üstü">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/ahmetkorkmaz3/EnvSwitcher" alt="MIT lisansı"></a>
+</p>
+
+<p align="center"><a href="https://ahmetkorkmaz3.github.io/EnvSwitcher/">Tanıtım sayfası</a> · <a href="#kurulum">Kurulum</a> · <a href="#hızlı-başlangıç">Hızlı başlangıç</a> · <a href="CONTRIBUTING.md">Katkı</a></p>
 
 EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren bir macOS menü çubuğu uygulamasıdır. Örnek: `local`, `test` ve `canli` değerlerini tek tıkla değiştirin.
 
@@ -119,55 +130,9 @@ Bu komutlar `.env` dosyalarınızı değiştirmez.
 
 `store.json` bozulursa uygulama yedeği yükler ve bir uyarı gösterir.
 
-## Derleme
+## Katkı
 
-**Gereksinimler:** macOS 14 veya üstü ve Xcode. Xcode'u aktif yapın:
-
-```sh
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-sudo xcodebuild -license accept
-```
-
-**Derleme ve çalıştırma:**
-
-```sh
-swift test                         # EnvCore testleri
-scripts/bundle.sh                  # build/EnvSwitcher.app oluşturur
-open build/EnvSwitcher.app
-```
-
-Uygulamayı kalıcı kullanmak için `build/EnvSwitcher.app` klasörünü `/Applications` içine kopyalayın.
-
-**Gerçek Keychain testi:**
-
-```sh
-ENVSWITCHER_KEYCHAIN_TESTS=1 swift test --filter VaultKeychainTests
-```
-
-### İmza ve Keychain izin sorusu
-
-Keychain bir kaydı oluşturan uygulamayı imzası ile tanır. Ad-hoc imza her derlemede değişir. Bu nedenle ad-hoc bir derlemeden sonra macOS bir kez izin sorar. Tüm gizli değerler tek bir kayıtta durur, bu nedenle soru bir kez çıkar.
-
-Bu soruyu önlemek için release sürümlerinin sertifikası ile imzalayın:
-
-1. Sertifikayı bir kez oluşturun: `scripts/make-signing-cert.sh`. Sertifika zaten varsa ve `.p12` dosyası sizdeyse, dosyayı çift tıklayıp giriş Keychain'ine alın.
-2. Derleyin: `CODESIGN_IDENTITY="EnvSwitcher Self-Signed" scripts/bundle.sh`
-
-Sürüm çıkarma adımları: [`docs/release.md`](docs/release.md).
-
-## Proje yapısı
-
-| Klasör | İçerik |
-|---|---|
-| `Sources/EnvCore` | Arayüzden bağımsız mantık: ayrıştırma, tarama, Keychain, ortam değiştirme. Testler bu modülü kapsar. |
-| `Sources/EnvSwitcher` | SwiftUI uygulaması: menü çubuğu, yönetim penceresi, fark penceresi. |
-| `Tests/EnvCoreTests` | Birim testleri. |
-| `docs/manual-test.md` | Her sürümden önce uygulanacak elle test listesi. |
-| `docs/superpowers/specs/` | Tasarım dokümanı. |
-| `scripts/` | Derleme, ikon, sertifika ve CHANGELOG betikleri. |
-| `install.sh` | Kurulum ve güncelleme betiği. |
-| `.github/workflows/` | CI ve release iş akışları. |
-| `docs/release.md` | Sürüm çıkarma adımları. |
+Derleme, test, proje yapısı ve pull request kuralları: [CONTRIBUTING.md](CONTRIBUTING.md). Sürüm çıkarma adımları: [`docs/release.md`](docs/release.md).
 
 ## Lisans
 
