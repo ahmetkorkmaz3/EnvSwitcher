@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EnvSwitcher — .env ortamlarını tek tıkla değiştirin</title>
-  <meta name="description" content="EnvSwitcher, bir projedeki .env dosyalarını local, test ve canli ortamları arasında değiştiren bir macOS menü çubuğu uygulamasıdır. Gizli değerler Keychain içinde durur.">
+  <title data-i18n="meta.title">EnvSwitcher — Switch .env environments with one click</title>
+  <meta name="description" data-i18n-attr="content:meta.description" content="EnvSwitcher is a macOS menu bar app that switches the .env files of a project between the local, test, and canli environments. Secret values stay in the Keychain.">
   <meta property="og:title" content="EnvSwitcher">
-  <meta property="og:description" content=".env dosyalarını ortamlar arasında tek tıkla değiştiren macOS menü çubuğu uygulaması.">
+  <meta property="og:description" content="A macOS menu bar app that switches .env files between environments with one click.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="icon.png">
   <link rel="icon" type="image/png" href="icon.png">
@@ -199,19 +199,25 @@
     footer nav { position: static; background: none; border: 0; backdrop-filter: none; display: flex; gap: 18px; }
     footer a { color: var(--muted); }
 
+    .lang-toggle { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 8px; padding: 4px 10px; font: 600 13px/1.2 inherit; font-family: inherit; cursor: pointer; }
+    .lang-toggle:hover { border-color: var(--accent); }
+    .lang-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .nav-links { align-items: center; }
+
     .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   </style>
 </head>
 <body>
 
-<nav aria-label="Ana menü">
+<nav aria-label="Main menu" data-i18n-attr="aria-label:nav.label">
   <div class="wrap">
     <a class="brand" href="#top"><img src="icon.png" alt="" width="28" height="28">EnvSwitcher</a>
     <div class="nav-links">
-      <a class="hide-sm" href="#ozellikler">Özellikler</a>
-      <a class="hide-sm" href="#guvenlik">Güvenlik</a>
-      <a href="#kurulum">Kurulum</a>
+      <a class="hide-sm" href="#features" data-i18n="nav.features">Features</a>
+      <a class="hide-sm" href="#security" data-i18n="nav.security">Security</a>
+      <a href="#install" data-i18n="nav.install">Install</a>
       <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher">GitHub</a>
+      <button type="button" class="lang-toggle" id="lang-toggle" hidden lang="tr" aria-label="Türkçe göster" aria-pressed="false">TR</button>
     </div>
   </div>
 </nav>
@@ -219,55 +225,55 @@
 <main id="top">
   <header class="hero">
     <div class="wrap">
-      <img class="hero-icon" src="icon.png" alt="EnvSwitcher uygulama ikonu" width="104" height="104">
-      <h1><code style="all: unset">.env</code> ortamlarını<br><span class="grad">tek tıkla değiştirin.</span></h1>
-      <p class="lead">EnvSwitcher bir macOS menü çubuğu uygulamasıdır. Değerleri bir kez girin. <code>local</code>, <code>test</code> veya <code>canli</code> seçin. Uygulama projedeki tüm <code>.env</code> dosyalarını yeniden yazar.</p>
+      <img class="hero-icon" src="icon.png" alt="EnvSwitcher app icon" data-i18n-attr="alt:hero.iconAlt" width="104" height="104">
+      <h1 data-i18n="hero.title">Switch <code style="all: unset">.env</code> environments<br><span class="grad">with one click.</span></h1>
+      <p class="lead" data-i18n="hero.lead">EnvSwitcher is a macOS menu bar app. Enter your values one time. Choose <code>local</code>, <code>test</code>, or <code>canli</code>. The app writes all <code>.env</code> files in the project again.</p>
 
       <div class="install">
-        <pre aria-label="Kurulum komutu"><span class="prompt">$ </span><span id="cmd">curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh</span></pre>
-        <button class="copy" type="button" data-copy="cmd">Kopyala</button>
+        <pre aria-label="Install command" data-i18n-attr="aria-label:hero.cmdLabel"><span class="prompt">$ </span><span id="cmd">curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh</span></pre>
+        <button class="copy" type="button" data-copy="cmd">Copy</button>
       </div>
       <div class="badges">
-        <span>macOS 14 ve üstü</span>
-        <span>Apple Silicon ve Intel</span>
-        <span>Ücretsiz, MIT lisansı</span>
+        <span data-i18n="hero.badge.macos">macOS 14 or later</span>
+        <span data-i18n="hero.badge.arch">Apple Silicon and Intel</span>
+        <span data-i18n="hero.badge.license">Free, MIT License</span>
       </div>
       <div class="actions">
         <a class="btn" href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
-          Son sürümü indir
+          <span data-i18n="hero.download">Download the latest version</span>
         </a>
         <a class="btn" href="https://github.com/ahmetkorkmaz3/EnvSwitcher">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
-          Kaynak kodu
+          <span data-i18n="hero.source">Source code</span>
         </a>
       </div>
 
-      <div class="demo" aria-label="Menü çubuğu örneği">
+      <div class="demo" aria-label="Menu bar example" data-i18n-attr="aria-label:demo.label">
         <div class="screen">
           <div class="menubar">
             <span class="item active">karaca · test</span>
-            <span>Prş 8 Eki 14:20</span>
+            <span data-i18n="demo.clock">Thu Oct 8 2:20 PM</span>
           </div>
           <div class="desk">
             <div class="menu">
               <div class="row hl"><span class="dot orange"></span>karaca<span class="chev">›</span></div>
               <div class="row"><span class="dot green"></span>api-server<span class="chev">›</span></div>
               <div class="sep"></div>
-              <div class="row">Proje Ekle…<span class="kbd">⌘N</span></div>
-              <div class="row">Yönet…<span class="kbd">⌘M</span></div>
-              <div class="row">Ayarlar…<span class="kbd">⌘,</span></div>
+              <div class="row"><span data-i18n="demo.addProject">Add Project…</span><span class="kbd">⌘N</span></div>
+              <div class="row"><span data-i18n="demo.manage">Manage…</span><span class="kbd">⌘M</span></div>
+              <div class="row"><span data-i18n="demo.settings">Settings…</span><span class="kbd">⌘,</span></div>
               <div class="sep"></div>
-              <div class="row">Çık<span class="kbd">⌘Q</span></div>
-              <div class="label">Sürüm 0.2.0</div>
+              <div class="row"><span data-i18n="demo.quit">Quit</span><span class="kbd">⌘Q</span></div>
+              <div class="label" data-i18n="demo.version">Version 0.2.0</div>
             </div>
             <div class="menu sub">
-              <div class="label">Tüm dosyalar</div>
+              <div class="label" data-i18n="demo.allFiles">All Files</div>
               <div class="row"><span class="check"></span><span class="dot green"></span>local</div>
               <div class="row hl"><span class="check">✓</span><span class="dot orange"></span>test</div>
               <div class="row"><span class="check"></span><span class="dot red"></span>canli<span class="lock">🔒</span></div>
               <div class="sep"></div>
-              <div class="label">Dosyalar</div>
+              <div class="label" data-i18n="demo.files">Files</div>
               <div class="row">apps/cart/.env.local<span class="chev">›</span></div>
               <div class="row">apps/web/.env.local<span class="chev">›</span></div>
               <div class="row">packages/api/.env<span class="chev">›</span></div>
@@ -278,63 +284,63 @@
     </div>
   </header>
 
-  <section id="ozellikler" class="alt">
+  <section id="features" class="alt">
     <div class="wrap">
-      <div class="eyebrow">Özellikler</div>
-      <h2>Dosyaları elle düzenlemeyi bırakın.</h2>
-      <p class="section-lead">Her ortamın değerleri uygulamada durur. Ortam değiştirmek bir menü tıklamasıdır.</p>
+      <div class="eyebrow" data-i18n="features.eyebrow">Features</div>
+      <h2 data-i18n="features.title">Stop editing files by hand.</h2>
+      <p class="section-lead" data-i18n="features.lead">The app keeps the values of each environment. To change the environment, you click a menu item.</p>
       <div class="grid">
         <div class="card">
           <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></div>
-          <h3>Tek tıkla geçiş</h3>
-          <p>Menü çubuğundan bir ortam seçin. Projedeki dosyalar o ortamın değerleri ile yazılır.</p>
+          <h3 data-i18n="features.switch.title">One-click switch</h3>
+          <p data-i18n="features.switch.text">Choose an environment in the menu bar. The app writes the project files with the values of that environment.</p>
         </div>
         <div class="card">
           <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
-          <h3>Monorepo desteği</h3>
-          <p>Uygulama klasörü tarar ve tüm <code>.env</code> dosyalarını bulur. Dosyalar birlikte veya tek tek değişir.</p>
+          <h3 data-i18n="features.monorepo.title">Monorepo support</h3>
+          <p data-i18n="features.monorepo.text">The app scans the folder and finds all <code>.env</code> files. The files change together or one at a time.</p>
         </div>
         <div class="card">
           <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
-          <h3>Gizli değerler Keychain içinde</h3>
-          <p>Token, şifre ve anahtarlar macOS Keychain içinde durur. Diskteki ayar dosyasına girmez.</p>
+          <h3 data-i18n="features.keychain.title">Secret values in the Keychain</h3>
+          <p data-i18n="features.keychain.text">Tokens, passwords, and keys stay in the macOS Keychain. They do not go into the settings file on disk.</p>
         </div>
         <div class="card">
           <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M5 8h4M5 12h4M15 12h4M15 16h4"/></svg></div>
-          <h3>Ortamları karşılaştırma</h3>
-          <p>Bir dosyanın değerleri yan yana görünür. Eksik anahtarları tek tıkla diğer ortamlara kopyalayın.</p>
+          <h3 data-i18n="features.compare.title">Compare environments</h3>
+          <p data-i18n="features.compare.text">See the values of a file side by side. Copy missing keys to the other environments with one click.</p>
         </div>
         <div class="card">
           <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg></div>
-          <h3>Panodan yapıştırma</h3>
-          <p><code>KEY=değer</code> satırlarını kopyalayın ve bir ortama yapıştırın. Gizli görünen anahtarlar Keychain'e gider.</p>
+          <h3 data-i18n="features.paste.title">Paste from the clipboard</h3>
+          <p data-i18n="features.paste.text">Copy <code>KEY=value</code> lines and paste them into an environment. Keys that look secret go to the Keychain.</p>
         </div>
         <div class="card">
           <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></div>
-          <h3>Kolay güncelleme</h3>
-          <p>Yeni bir sürüm çıkınca menüde bir satır görünür. Kurulum komutu aynı zamanda güncelleme komutudur.</p>
+          <h3 data-i18n="features.update.title">Easy updates</h3>
+          <p data-i18n="features.update.text">When a new version is available, the menu shows a line. The install command is also the update command.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="nasil">
+  <section id="how">
     <div class="wrap">
-      <div class="eyebrow">Nasıl çalışır</div>
-      <h2>Üç adımda başlayın.</h2>
-      <p class="section-lead">İlk kurulum yaklaşık 2 dakika sürer.</p>
+      <div class="eyebrow" data-i18n="how.eyebrow">How it works</div>
+      <h2 data-i18n="how.title">Start in three steps.</h2>
+      <p class="section-lead" data-i18n="how.lead">The first setup takes about 2 minutes.</p>
       <ol class="steps">
         <li>
-          <h3>Projeyi ekleyin</h3>
-          <p>Menüden <b>Proje Ekle…</b> seçin. Klasörü seçin veya pencereye sürükleyin.</p>
+          <h3 data-i18n="how.1.title">Add the project</h3>
+          <p data-i18n="how.1.text">Choose <b>Add Project…</b> in the menu. Choose the folder or drag it into the window.</p>
         </li>
         <li>
-          <h3>Değerleri aktarın</h3>
-          <p>Bulunan dosyaları kontrol edin. Mevcut içerik <code>local</code> ortamına aktarılır.</p>
+          <h3 data-i18n="how.2.title">Import the values</h3>
+          <p data-i18n="how.2.text">Check the files that the app found. The app imports the current content into the <code>local</code> environment.</p>
         </li>
         <li>
-          <h3>Ortamı seçin</h3>
-          <p><code>test</code> değerlerini girin. Menüden proje → <b>Tüm dosyalar → test</b> seçin.</p>
+          <h3 data-i18n="how.3.title">Choose the environment</h3>
+          <p data-i18n="how.3.text">Enter the <code>test</code> values. In the menu, choose the project → <b>All Files → test</b>.</p>
         </li>
       </ol>
     </div>
@@ -343,27 +349,27 @@
   <section class="alt">
     <div class="wrap split">
       <div>
-        <div class="eyebrow">Karşılaştırma</div>
-        <h2>Eksik anahtarı canlıya çıkmadan görün.</h2>
-        <p class="section-lead" style="margin-bottom: 24px">Her anahtar bir satırda durur. Satırın rengi durumu gösterir.</p>
+        <div class="eyebrow" data-i18n="compare.eyebrow">Compare</div>
+        <h2 data-i18n="compare.title">See a missing key before it goes live.</h2>
+        <p class="section-lead" style="margin-bottom: 24px" data-i18n="compare.lead">Each key has one row. The color of the row shows its status.</p>
         <ul class="list">
-          <li><div><b>Kırmızı: bir ortamda eksik</b><span>Hücreye bir değer yazın veya başka bir ortamdan kopyalayın.</span></div></li>
-          <li><div><b>Turuncu: değerler farklı</b><span>Ortama özel değerleri bir bakışta kontrol edin.</span></div></li>
-          <li><div><b>Gri: tüm ortamlarda aynı</b><span>Filtre ile bu satırları gizleyin.</span></div></li>
+          <li><div><b data-i18n="compare.red.title">Red: missing in an environment</b><span data-i18n="compare.red.text">Type a value in the cell or copy it from a different environment.</span></div></li>
+          <li><div><b data-i18n="compare.orange.title">Orange: the values are different</b><span data-i18n="compare.orange.text">Check the values for each environment at a glance.</span></div></li>
+          <li><div><b data-i18n="compare.gray.title">Gray: the same in all environments</b><span data-i18n="compare.gray.text">Use the filter to hide these rows.</span></div></li>
         </ul>
       </div>
-      <div class="table-card" aria-label="Karşılaştırma görünümü örneği">
-        <div class="table-head"><span class="file">apps/cart/.env.local</span><span class="pill">Karşılaştır</span></div>
+      <div class="table-card" aria-label="Compare view example" data-i18n-attr="aria-label:compare.tableLabel">
+        <div class="table-head"><span class="file">apps/cart/.env.local</span><span class="pill" data-i18n="compare.pill">Compare</span></div>
         <div class="scroll">
           <table>
             <thead>
-              <tr><th>Anahtar</th><th><span class="dot green"></span>local</th><th><span class="dot orange"></span>test</th><th><span class="dot red"></span>canli</th></tr>
+              <tr><th data-i18n="compare.key">Key</th><th><span class="dot green"></span>local</th><th><span class="dot orange"></span>test</th><th><span class="dot red"></span>canli</th></tr>
             </thead>
             <tbody>
               <tr><td class="key"><span class="mark orange"></span>APP_ENV</td><td class="val">local</td><td class="val">test</td><td class="val">canli</td></tr>
               <tr><td class="key"><span class="mark orange"></span>API_URL</td><td class="val">localhost:4000</td><td class="val">test.api.app</td><td class="val">api.app</td></tr>
-              <tr><td class="key"><span class="mark red"></span>STRIPE_SECRET_KEY</td><td class="val">••••</td><td class="val">••••</td><td class="val missing">eksik</td></tr>
-              <tr><td class="key"><span class="mark red"></span>SENTRY_DSN</td><td class="val missing">eksik</td><td class="val">••••</td><td class="val">••••</td></tr>
+              <tr><td class="key"><span class="mark red"></span>STRIPE_SECRET_KEY</td><td class="val">••••</td><td class="val">••••</td><td class="val missing" data-i18n="compare.missing">missing</td></tr>
+              <tr><td class="key"><span class="mark red"></span>SENTRY_DSN</td><td class="val missing" data-i18n="compare.missing">missing</td><td class="val">••••</td><td class="val">••••</td></tr>
               <tr><td class="key"><span class="mark gray"></span>LOG_LEVEL</td><td class="val">info</td><td class="val">info</td><td class="val">info</td></tr>
             </tbody>
           </table>
@@ -372,70 +378,70 @@
     </div>
   </section>
 
-  <section id="guvenlik">
+  <section id="security">
     <div class="wrap">
-      <div class="eyebrow">Güvenlik</div>
-      <h2>Dosyalarınız güvende kalır.</h2>
-      <p class="section-lead">Uygulama yazmadan önce kontrol eder. Bir hata olursa eski içeriğe döner.</p>
+      <div class="eyebrow" data-i18n="security.eyebrow">Security</div>
+      <h2 data-i18n="security.title">Your files stay safe.</h2>
+      <p class="section-lead" data-i18n="security.lead">The app checks the files before it writes them. If an error occurs, the files go back to their old contents.</p>
       <div class="grid">
         <div class="card">
-          <h3>Elle değişiklik kontrolü</h3>
-          <p>Bir dosyayı editörde değiştirdiyseniz, uygulama farkı gösterir. Değişikliği kaydedin, atın veya iptal edin.</p>
+          <h3 data-i18n="security.drift.title">Manual change check</h3>
+          <p data-i18n="security.drift.text">If you changed a file in an editor, the app shows the difference. Save the change, discard it, or cancel.</p>
         </div>
         <div class="card">
-          <h3>Ya hep ya hiç yazma</h3>
-          <p>Bir dosya yazılamazsa, yazılan dosyalar eski içeriğe döner.</p>
+          <h3 data-i18n="security.atomic.title">All-or-nothing writes</h3>
+          <p data-i18n="security.atomic.text">If the app cannot write one file, the files it already wrote go back to their old contents.</p>
         </div>
         <div class="card">
-          <h3>Korumalı ortam</h3>
-          <p><code>canli</code> gibi korumalı bir ortama geçmeden önce uygulama onay ister.</p>
+          <h3 data-i18n="security.protected.title">Protected environments</h3>
+          <p data-i18n="security.protected.text">Before you switch to a protected environment such as <code>canli</code>, the app asks for confirmation.</p>
         </div>
         <div class="card">
-          <h3>Boş ortam uyarısı</h3>
-          <p>Seçilen ortamda bir dosya için değer yoksa uygulama sorar. Dosyalar yanlışlıkla boşalmaz.</p>
+          <h3 data-i18n="security.empty.title">Empty environment warning</h3>
+          <p data-i18n="security.empty.text">If the selected environment has no values for a file, the app asks first. Files do not become empty by accident.</p>
         </div>
         <div class="card">
-          <h3>İzinler korunur</h3>
-          <p>Dosya izinleri (örnek <code>600</code>) değişmez. Sembolik bağlantının hedefine yazılır.</p>
+          <h3 data-i18n="security.perms.title">Permissions stay the same</h3>
+          <p data-i18n="security.perms.text">File permissions (for example <code>600</code>) do not change. The app writes to the target of a symbolic link.</p>
         </div>
         <div class="card">
-          <h3>Git uyarısı</h3>
-          <p>Bir <code>.env</code> dosyası <code>.gitignore</code> içinde değilse, proje eklerken uyarı çıkar.</p>
+          <h3 data-i18n="security.git.title">Git warning</h3>
+          <p data-i18n="security.git.text">If a <code>.env</code> file is not in <code>.gitignore</code>, the app shows a warning when you add the project.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="kurulum" class="alt">
+  <section id="install" class="alt">
     <div class="wrap">
-      <div class="eyebrow">Kurulum</div>
-      <h2>Tek komutla kurun.</h2>
-      <p class="section-lead">Komut son sürümü indirir, SHA-256 değerini kontrol eder, <code>/Applications</code> içine kurar ve uygulamayı açar.</p>
-      <pre class="code"><span class="c"># Kurulum ve güncelleme</span>
+      <div class="eyebrow" data-i18n="install.eyebrow">Install</div>
+      <h2 data-i18n="install.title">Install with one command.</h2>
+      <p class="section-lead" data-i18n="install.lead">The command downloads the latest version, checks its SHA-256 value, installs it in <code>/Applications</code>, and opens the app.</p>
+      <pre class="code"><span class="c" data-i18n="install.comment1"># Install and update</span>
 curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
 
-<span class="c"># Belirli bir sürüm</span>
+<span class="c" data-i18n="install.comment2"># A specific version</span>
 curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh</pre>
 
       <details>
-        <summary>Elle kurulum</summary>
+        <summary data-i18n="install.manual.title">Manual install</summary>
         <ol>
-          <li><a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest">Releases</a> sayfasından <code>EnvSwitcher-X.Y.Z.zip</code> dosyasını indirin.</li>
-          <li>Zip dosyasını açın. <code>EnvSwitcher.app</code> dosyasını <code>/Applications</code> içine taşıyın.</li>
-          <li>Uygulamayı açın. macOS "Apple doğrulayamadı" uyarısını gösterir. <b>Bitti</b> düğmesine basın.</li>
-          <li>Sistem Ayarları → Gizlilik ve Güvenlik sayfasını açın. <b>Yine de Aç</b> düğmesine basın.</li>
+          <li data-i18n="install.manual.1">Download <code>EnvSwitcher-X.Y.Z.zip</code> from the <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest">Releases</a> page.</li>
+          <li data-i18n="install.manual.2">Open the zip file. Move <code>EnvSwitcher.app</code> into <code>/Applications</code>.</li>
+          <li data-i18n="install.manual.3">Open the app. macOS shows the "Apple could not verify" warning. Click <b>Done</b>.</li>
+          <li data-i18n="install.manual.4">Open System Settings → Privacy &amp; Security. Click <b>Open Anyway</b>.</li>
         </ol>
-        <p>Uygulama notarize edilmedi. Bu nedenle tarayıcıdan indirilen dosyada bu uyarı çıkar. Kurulum komutu bu uyarıyı göstermez.</p>
+        <p data-i18n="install.manual.note">The app is not notarized, so a file from a browser download shows this warning. The install command does not show it.</p>
       </details>
 
       <details>
-        <summary>Kaldırma</summary>
+        <summary data-i18n="install.remove.title">Uninstall</summary>
         <pre class="code">osascript -e 'quit app "EnvSwitcher"'
 rm -rf /Applications/EnvSwitcher.app
 rm -rf ~/Library/Application\ Support/EnvSwitcher
 security delete-generic-password -s EnvSwitcher -a vault
 defaults delete com.ahmetkorkmaz.envswitcher</pre>
-        <p>Bu komutlar <code>.env</code> dosyalarınızı değiştirmez.</p>
+        <p data-i18n="install.remove.note">These commands do not change your <code>.env</code> files.</p>
       </details>
     </div>
   </section>
@@ -443,12 +449,12 @@ defaults delete com.ahmetkorkmaz.envswitcher</pre>
 
 <footer>
   <div class="wrap">
-    <span>EnvSwitcher · MIT lisansı</span>
-    <nav aria-label="Alt menü">
+    <span data-i18n="footer.license">EnvSwitcher · MIT License</span>
+    <nav aria-label="Footer menu" data-i18n-attr="aria-label:footer.label">
       <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher">GitHub</a>
-      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases">Sürümler</a>
-      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/blob/main/CHANGELOG.md">Değişiklikler</a>
-      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/blob/main/CONTRIBUTING.md">Katkı</a>
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases" data-i18n="footer.releases">Releases</a>
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/blob/main/CHANGELOG.md" data-i18n="footer.changelog">Changelog</a>
+      <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/blob/main/CONTRIBUTING.md" data-i18n="footer.contributing">Contributing</a>
     </nav>
   </div>
 </footer>
@@ -456,13 +462,165 @@ defaults delete com.ahmetkorkmaz.envswitcher</pre>
 <p class="sr-only" aria-live="polite" id="status"></p>
 
 <script>
+  // Turkish texts. The English texts are in the HTML, so the page works without this script.
+  var TR = {
+    "meta.title": "EnvSwitcher — .env ortamlarını tek tıkla değiştirin",
+    "meta.description": "EnvSwitcher, bir projedeki .env dosyalarını local, test ve canli ortamları arasında değiştiren bir macOS menü çubuğu uygulamasıdır. Gizli değerler Keychain içinde durur.",
+    "nav.label": "Ana menü",
+    "nav.features": "Özellikler",
+    "nav.security": "Güvenlik",
+    "nav.install": "Kurulum",
+    "hero.iconAlt": "EnvSwitcher uygulama ikonu",
+    "hero.title": "<code style=\"all: unset\">.env</code> ortamlarını<br><span class=\"grad\">tek tıkla değiştirin.</span>",
+    "hero.lead": "EnvSwitcher bir macOS menü çubuğu uygulamasıdır. Değerleri bir kez girin. <code>local</code>, <code>test</code> veya <code>canli</code> seçin. Uygulama projedeki tüm <code>.env</code> dosyalarını yeniden yazar.",
+    "hero.cmdLabel": "Kurulum komutu",
+    "hero.badge.macos": "macOS 14 ve üstü",
+    "hero.badge.arch": "Apple Silicon ve Intel",
+    "hero.badge.license": "Ücretsiz, MIT lisansı",
+    "hero.download": "Son sürümü indir",
+    "hero.source": "Kaynak kodu",
+    "demo.label": "Menü çubuğu örneği",
+    "demo.clock": "Prş 8 Eki 14:20",
+    "demo.addProject": "Proje Ekle…",
+    "demo.manage": "Yönet…",
+    "demo.settings": "Ayarlar…",
+    "demo.quit": "Çık",
+    "demo.version": "Sürüm 0.2.0",
+    "demo.allFiles": "Tüm dosyalar",
+    "demo.files": "Dosyalar",
+    "features.eyebrow": "Özellikler",
+    "features.title": "Dosyaları elle düzenlemeyi bırakın.",
+    "features.lead": "Her ortamın değerleri uygulamada durur. Ortam değiştirmek bir menü tıklamasıdır.",
+    "features.switch.title": "Tek tıkla geçiş",
+    "features.switch.text": "Menü çubuğundan bir ortam seçin. Projedeki dosyalar o ortamın değerleri ile yazılır.",
+    "features.monorepo.title": "Monorepo desteği",
+    "features.monorepo.text": "Uygulama klasörü tarar ve tüm <code>.env</code> dosyalarını bulur. Dosyalar birlikte veya tek tek değişir.",
+    "features.keychain.title": "Gizli değerler Keychain içinde",
+    "features.keychain.text": "Token, şifre ve anahtarlar macOS Keychain içinde durur. Diskteki ayar dosyasına girmez.",
+    "features.compare.title": "Ortamları karşılaştırma",
+    "features.compare.text": "Bir dosyanın değerleri yan yana görünür. Eksik anahtarları tek tıkla diğer ortamlara kopyalayın.",
+    "features.paste.title": "Panodan yapıştırma",
+    "features.paste.text": "<code>KEY=değer</code> satırlarını kopyalayın ve bir ortama yapıştırın. Gizli görünen anahtarlar Keychain'e gider.",
+    "features.update.title": "Kolay güncelleme",
+    "features.update.text": "Yeni bir sürüm çıkınca menüde bir satır görünür. Kurulum komutu aynı zamanda güncelleme komutudur.",
+    "how.eyebrow": "Nasıl çalışır",
+    "how.title": "Üç adımda başlayın.",
+    "how.lead": "İlk kurulum yaklaşık 2 dakika sürer.",
+    "how.1.title": "Projeyi ekleyin",
+    "how.1.text": "Menüden <b>Proje Ekle…</b> seçin. Klasörü seçin veya pencereye sürükleyin.",
+    "how.2.title": "Değerleri aktarın",
+    "how.2.text": "Bulunan dosyaları kontrol edin. Mevcut içerik <code>local</code> ortamına aktarılır.",
+    "how.3.title": "Ortamı seçin",
+    "how.3.text": "<code>test</code> değerlerini girin. Menüden proje → <b>Tüm dosyalar → test</b> seçin.",
+    "compare.eyebrow": "Karşılaştırma",
+    "compare.title": "Eksik anahtarı canlıya çıkmadan görün.",
+    "compare.lead": "Her anahtar bir satırda durur. Satırın rengi durumu gösterir.",
+    "compare.red.title": "Kırmızı: bir ortamda eksik",
+    "compare.red.text": "Hücreye bir değer yazın veya başka bir ortamdan kopyalayın.",
+    "compare.orange.title": "Turuncu: değerler farklı",
+    "compare.orange.text": "Ortama özel değerleri bir bakışta kontrol edin.",
+    "compare.gray.title": "Gri: tüm ortamlarda aynı",
+    "compare.gray.text": "Filtre ile bu satırları gizleyin.",
+    "compare.tableLabel": "Karşılaştırma görünümü örneği",
+    "compare.pill": "Karşılaştır",
+    "compare.key": "Anahtar",
+    "compare.missing": "eksik",
+    "security.eyebrow": "Güvenlik",
+    "security.title": "Dosyalarınız güvende kalır.",
+    "security.lead": "Uygulama yazmadan önce kontrol eder. Bir hata olursa eski içeriğe döner.",
+    "security.drift.title": "Elle değişiklik kontrolü",
+    "security.drift.text": "Bir dosyayı editörde değiştirdiyseniz, uygulama farkı gösterir. Değişikliği kaydedin, atın veya iptal edin.",
+    "security.atomic.title": "Ya hep ya hiç yazma",
+    "security.atomic.text": "Bir dosya yazılamazsa, yazılan dosyalar eski içeriğe döner.",
+    "security.protected.title": "Korumalı ortam",
+    "security.protected.text": "<code>canli</code> gibi korumalı bir ortama geçmeden önce uygulama onay ister.",
+    "security.empty.title": "Boş ortam uyarısı",
+    "security.empty.text": "Seçilen ortamda bir dosya için değer yoksa uygulama sorar. Dosyalar yanlışlıkla boşalmaz.",
+    "security.perms.title": "İzinler korunur",
+    "security.perms.text": "Dosya izinleri (örnek <code>600</code>) değişmez. Sembolik bağlantının hedefine yazılır.",
+    "security.git.title": "Git uyarısı",
+    "security.git.text": "Bir <code>.env</code> dosyası <code>.gitignore</code> içinde değilse, proje eklerken uyarı çıkar.",
+    "install.eyebrow": "Kurulum",
+    "install.title": "Tek komutla kurun.",
+    "install.lead": "Komut son sürümü indirir, SHA-256 değerini kontrol eder, <code>/Applications</code> içine kurar ve uygulamayı açar.",
+    "install.comment1": "# Kurulum ve güncelleme",
+    "install.comment2": "# Belirli bir sürüm",
+    "install.manual.title": "Elle kurulum",
+    "install.manual.1": "<a href=\"https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest\">Releases</a> sayfasından <code>EnvSwitcher-X.Y.Z.zip</code> dosyasını indirin.",
+    "install.manual.2": "Zip dosyasını açın. <code>EnvSwitcher.app</code> dosyasını <code>/Applications</code> içine taşıyın.",
+    "install.manual.3": "Uygulamayı açın. macOS \"Apple doğrulayamadı\" uyarısını gösterir. <b>Bitti</b> düğmesine basın.",
+    "install.manual.4": "Sistem Ayarları → Gizlilik ve Güvenlik sayfasını açın. <b>Yine de Aç</b> düğmesine basın.",
+    "install.manual.note": "Uygulama notarize edilmedi. Bu nedenle tarayıcıdan indirilen dosyada bu uyarı çıkar. Kurulum komutu bu uyarıyı göstermez.",
+    "install.remove.title": "Kaldırma",
+    "install.remove.note": "Bu komutlar <code>.env</code> dosyalarınızı değiştirmez.",
+    "footer.label": "Alt menü",
+    "footer.license": "EnvSwitcher · MIT lisansı",
+    "footer.releases": "Sürümler",
+    "footer.changelog": "Değişiklikler",
+    "footer.contributing": "Katkı",
+    "copy.idle": "Kopyala",
+    "copy.done": "Kopyalandı",
+    "copy.status": "Komut panoya kopyalandı."
+  };
+  var STORE_KEY = "envswitcher-lang";
+  var currentLang = "en";
+  var original = {};
+
+  // Storage can be blocked (private window, blocked site data). The page then opens in English.
+  function readLang() {
+    try { return localStorage.getItem(STORE_KEY) === "tr" ? "tr" : "en"; } catch (e) { return "en"; }
+  }
+  function saveLang(lang) {
+    try { localStorage.setItem(STORE_KEY, lang); } catch (e) {}
+  }
+  function t(key, english) {
+    return currentLang === "tr" && TR[key] ? TR[key] : english;
+  }
+  function translated(key, store) {
+    if (currentLang !== "tr") return original[store];
+    if (!TR[key]) console.warn("Missing Turkish text: " + key);
+    return TR[key] || original[store];
+  }
+
+  function apply(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach(function (el) {
+      var key = el.dataset.i18n;
+      if (!(key in original)) original[key] = el.innerHTML;
+      el.innerHTML = translated(key, key);
+    });
+    document.querySelectorAll("[data-i18n-attr]").forEach(function (el) {
+      var parts = el.dataset.i18nAttr.split(":"), attr = parts[0], key = parts[1], store = "attr:" + key;
+      if (!(store in original)) original[store] = el.getAttribute(attr);
+      el.setAttribute(attr, translated(key, store));
+    });
+    document.querySelectorAll("[data-copy]").forEach(function (button) {
+      button.textContent = t("copy.idle", "Copy");
+    });
+    var toggle = document.getElementById("lang-toggle");
+    toggle.textContent = lang === "tr" ? "EN" : "TR";
+    toggle.lang = lang === "tr" ? "en" : "tr";
+    toggle.setAttribute("aria-label", lang === "tr" ? "Show in English" : "Türkçe göster");
+    toggle.setAttribute("aria-pressed", String(lang === "tr"));
+  }
+
+  var toggle = document.getElementById("lang-toggle");
+  toggle.hidden = false;
+  toggle.addEventListener("click", function () {
+    var next = currentLang === "tr" ? "en" : "tr";
+    saveLang(next);
+    apply(next);
+  });
+  apply(readLang());
+
   document.querySelectorAll("[data-copy]").forEach(function (button) {
     button.addEventListener("click", function () {
       var text = document.getElementById(button.dataset.copy).textContent;
       var done = function () {
-        button.textContent = "Kopyalandı";
-        document.getElementById("status").textContent = "Komut panoya kopyalandı.";
-        setTimeout(function () { button.textContent = "Kopyala"; }, 1800);
+        button.textContent = t("copy.done", "Copied");
+        document.getElementById("status").textContent = t("copy.status", "Command copied to the clipboard.");
+        setTimeout(function () { button.textContent = t("copy.idle", "Copy"); }, 1800);
       };
       if (navigator.clipboard) {
         navigator.clipboard.writeText(text).then(done, function () {});

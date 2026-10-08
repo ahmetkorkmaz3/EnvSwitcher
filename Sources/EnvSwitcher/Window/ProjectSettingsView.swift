@@ -11,19 +11,19 @@ struct ProjectSettingsView: View {
 
     var body: some View {
         Form {
-            Section("Proje") {
-                TextField("Ad", text: Binding(
+            Section("Project") {
+                TextField("Name", text: Binding(
                     get: { current.name },
                     set: { name in state.apply { var p = current; p.name = name; return p } }
                 ))
-                LabeledContent("Kök klasör") {
+                LabeledContent("Root Folder") {
                     HStack {
                         Text(current.rootPath)
                             .foregroundStyle(state.rootExists(current) ? .secondary : Color.red)
                             .textSelection(.enabled)
                             .lineLimit(1)
                             .truncationMode(.middle)
-                        Button(state.rootExists(current) ? "Değiştir…" : "Klasörü yeniden seç…") {
+                        Button(state.rootExists(current) ? "Change…" : "Choose the Folder Again…") {
                             guard let url = Panels.chooseFolder() else { return }
                             state.apply { state.projectEditor.relocate(current, to: url) }
                         }
@@ -31,56 +31,49 @@ struct ProjectSettingsView: View {
                 }
             }
 
-            Section("Ortamlar") {
+            Section("Environments") {
                 ForEach(current.environments) { environment in
                     EnvironmentRow(project: current, environment: environment)
                 }
                 Button {
                     state.apply { state.projectEditor.addEnvironment(named: newEnvironmentName, color: .blue, to: current) }
                 } label: {
-                    Label("Ortam ekle", systemImage: "plus")
+                    Label("Add Environment", systemImage: "plus")
                 }
             }
 
-            Section("Hedef dosyalar") {
+            Section("Target Files") {
                 ForEach(current.targets) { target in
                     TargetRow(project: current, target: target)
                 }
-                Menu("Dosya ekle") {
+                Menu("Add File") {
                     if newFiles.isEmpty {
-                        Text("Eklenecek yeni .env dosyası yok")
+                        Text("No new .env files to add")
                     }
                     ForEach(newFiles, id: \.relativePath) { file in
-                        Button("\(file.relativePath) (\(file.keyCount) anahtar)") { addTarget(file.relativePath) }
+                        Button("\(file.relativePath) (keys: \(file.keyCount))") { addTarget(file.relativePath) }
                     }
                 }
                 .fixedSize()
             }
 
             Section {
-                Button("Projeyi sil", role: .destructive) { confirmDelete = true }
+                Button("Delete Project", role: .destructive) { confirmDelete = true }
             }
         }
         .formStyle(.grouped)
         .navigationTitle(current.name)
         .task(id: ScanKey(rootPath: current.rootPath, targetPaths: current.targets.map(\.relativePath))) { loadNewFiles() }
-        .confirmationDialog("\(current.name) silinsin mi?", isPresented: $confirmDelete) {
-            Button("Sil", role: .destructive) { state.deleteProject(current) }
+        .confirmationDialog("Delete \(current.name)?", isPresented: $confirmDelete) {
+            Button("Delete", role: .destructive) { state.deleteProject(current) }
         } message: {
-            Text("Kayıtlı değerler ve Keychain kayıtları silinir. Diskteki .env dosyaları değişmez.")
+            Text("The app deletes the saved values and the Keychain items. The .env files on disk do not change.")
         }
     }
 
-    /// "yeni", then "yeni 2", "yeni 3" and so on.
+    /// "new", then "new 2", "new 3" and so on, in the app language.
     private var newEnvironmentName: String {
-        let names = Set(current.environments.map(\.name))
-        var name = "yeni"
-        var n = 2
-        while names.contains(name) {
-            name = "yeni \(n)"
-            n += 1
-        }
-        return name
+        UniqueName.numbered(base: String(localized: "new"), existing: Set(current.environments.map(\.name)))
     }
 
     /// The file's current contents become the values of the project's disk environment.
@@ -122,14 +115,14 @@ private struct TargetRow: View {
                 Image(systemName: "minus.circle")
             }
             .buttonStyle(.borderless)
-            .help("Dosyayı projeden çıkar. Diskteki dosya değişmez.")
+            .help("Remove the file from the project. The file on disk does not change.")
         }
-        .confirmationDialog("\(target.relativePath) projeden çıkarılsın mı?", isPresented: $confirmRemove) {
-            Button("Çıkar", role: .destructive) {
+        .confirmationDialog("Remove \(target.relativePath) from the project?", isPresented: $confirmRemove) {
+            Button("Remove", role: .destructive) {
                 state.apply { try state.projectEditor.removeTarget(id: target.id, from: project) }
             }
         } message: {
-            Text("Bu dosyanın tüm ortam değerleri ve Keychain kayıtları silinir. Diskteki dosya değişmez.")
+            Text("The app deletes all environment values and Keychain items of this file. The file on disk does not change.")
         }
     }
 }
@@ -142,10 +135,10 @@ private struct EnvironmentRow: View {
 
     var body: some View {
         HStack {
-            TextField("Ad", text: binding(\.name))
+            TextField("Name", text: binding(\.name))
                 .labelsHidden()
                 .frame(maxWidth: 160)
-            Picker("Renk", selection: binding(\.color)) {
+            Picker("Color", selection: binding(\.color)) {
                 ForEach(EnvColor.allCases, id: \.self) { color in
                     Label { Text(color.title) } icon: { Image(nsImage: DotImage.make(color.nsColor)) }
                         .tag(color)
@@ -153,7 +146,7 @@ private struct EnvironmentRow: View {
             }
             .labelsHidden()
             .fixedSize()
-            Toggle("Korumalı", isOn: binding(\.isProtected))
+            Toggle("Protected", isOn: binding(\.isProtected))
             Spacer()
             Button(role: .destructive) {
                 confirmDelete = true
@@ -161,14 +154,14 @@ private struct EnvironmentRow: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
-            .help("Ortamı ve değerlerini sil")
+            .help("Delete the environment and its values")
         }
-        .confirmationDialog("\(environment.name) ortamı silinsin mi?", isPresented: $confirmDelete) {
-            Button("Sil", role: .destructive) {
+        .confirmationDialog("Delete the \(environment.name) environment?", isPresented: $confirmDelete) {
+            Button("Delete", role: .destructive) {
                 state.apply { try state.projectEditor.deleteEnvironment(id: environment.id, from: project) }
             }
         } message: {
-            Text("Bu ortamın tüm değerleri ve Keychain kayıtları silinir. Diskteki .env dosyaları değişmez.")
+            Text("The app deletes all values and Keychain items of this environment. The .env files on disk do not change.")
         }
     }
 

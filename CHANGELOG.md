@@ -2,6 +2,17 @@
 
 Bu dosya [Keep a Changelog](https://keepachangelog.com/tr-TR/1.1.0/) biçimini kullanır. Sürümler [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar.
 
+## [Yayımlanmadı]
+
+### Eklenenler
+
+- İngilizce ve Türkçe dil desteği. Uygulama ilk açılışta macOS dilini kullanır. Dil Ayarlar'dan değişir.
+- Landing page İngilizce açılır. TR düğmesi sayfayı Türkçe yapar.
+
+### Değişenler
+
+- `.env` dosyalarının başlık yorumu İngilizce yazılır.
+
 ## [0.2.0] - 2026-10-08
 
 İlk herkese açık sürüm.

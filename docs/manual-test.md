@@ -110,3 +110,16 @@ scripts/bundle.sh && open build/EnvSwitcher.app
 5. Eski bir sürüm kurun: `curl -fsSL …/install.sh | ENVSWITCHER_VERSION=<eski> sh`. `defaults delete com.ahmetkorkmaz.envswitcher storedUpdate` çalıştırın ve uygulamayı yeniden açın.
    - Beklenen: menüde "Güncelleme var: <son sürüm>" satırı çıkar. Satır seçilince release sayfası açılır ve komut panoya kopyalanır.
    - Uygulamayı yeniden açın. Beklenen: satır yine görünür.
+
+## 10. Dil
+
+1. `open build/EnvSwitcher.app --args -AppleLanguages "(tr)"` çalıştırın.
+   - Beklenen: menü, pencereler ve uyarılar Türkçe görünür.
+2. `open build/EnvSwitcher.app --args -AppleLanguages "(de)"` çalıştırın.
+   - Beklenen: tüm metinler İngilizce görünür.
+3. Ayarlar'da **Language** değerini **Türkçe** yapın.
+   - Beklenen: **Restart Now** düğmesi çıkar. Düğmeye basınca uygulama Türkçe açılır.
+4. Ayarlar'da **Dil** değerini **Sistem** yapın ve yeniden başlatın.
+   - Beklenen: uygulama sistem dilinde açılır.
+5. Landing page'i açın.
+   - Beklenen: sayfa İngilizce açılır. **TR** düğmesi sayfayı Türkçe yapar. Sayfa yenilenince seçim korunur.

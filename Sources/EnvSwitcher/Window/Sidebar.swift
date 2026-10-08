@@ -68,7 +68,7 @@ struct Sidebar: View {
         .listStyle(.sidebar)
         .safeAreaInset(edge: .bottom) {
             Button { state.showAddProject = true } label: {
-                Label("Proje Ekle", systemImage: "plus")
+                Label("Add Project", systemImage: "plus")
             }
             .buttonStyle(.borderless)
             .padding(10)
@@ -161,7 +161,7 @@ private struct FileRow: View {
                 }
                 if let environment = target.activeEnvironmentId.flatMap({ project.environment(id: $0) }) {
                     Circle().fill(environment.color.color).frame(width: 8, height: 8)
-                        .help("Diskteki ortam: \(environment.name)")
+                        .help("Environment on disk: \(environment.name)")
                 }
             }
         } icon: {

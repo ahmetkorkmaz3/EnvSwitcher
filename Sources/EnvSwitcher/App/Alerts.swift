@@ -8,10 +8,10 @@ enum Alerts {
         NSApp.activate()
         let alert = NSAlert()
         alert.alertStyle = .critical
-        alert.messageText = "\(projectName) projesi \(environmentName.uppercased()) ortamına geçecek."
-        alert.informativeText = "\(fileCount) dosya değişecek."
-        alert.addButton(withTitle: "Geç")
-        alert.addButton(withTitle: "Vazgeç")
+        alert.messageText = String(localized: "Project \(projectName) switches to the \(environmentName.uppercased()) environment.")
+        alert.informativeText = String(localized: "Files to change: \(fileCount)")
+        alert.addButton(withTitle: String(localized: "Switch"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         return alert.runModal() == .alertFirstButtonReturn
     }
 
@@ -19,9 +19,9 @@ enum Alerts {
         NSApp.activate()
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "İşlem tamamlanmadı"
+        alert.messageText = String(localized: "The Action Did Not Complete")
         alert.informativeText = message
-        alert.addButton(withTitle: "Tamam")
+        alert.addButton(withTitle: String(localized: "OK"))
         alert.runModal()
     }
 
@@ -31,7 +31,7 @@ enum Alerts {
         alert.alertStyle = .informational
         alert.messageText = title
         alert.informativeText = message
-        alert.addButton(withTitle: "Tamam")
+        alert.addButton(withTitle: String(localized: "OK"))
         alert.runModal()
     }
 
@@ -40,10 +40,10 @@ enum Alerts {
         NSApp.activate()
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "Geçiş başlamadı"
+        alert.messageText = String(localized: "The Switch Did Not Start")
         alert.informativeText = message
-        alert.addButton(withTitle: "Tamam")
-        alert.addButton(withTitle: "Dosyayı projeden çıkar")
+        alert.addButton(withTitle: String(localized: "OK"))
+        alert.addButton(withTitle: String(localized: "Remove from Project"))
         return alert.runModal() == .alertSecondButtonReturn
     }
 
@@ -52,13 +52,13 @@ enum Alerts {
         NSApp.activate()
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "\(environmentName) ortamında bu dosyalar için değer yok."
-        alert.informativeText = """
-            Geçerseniz bu dosyalar boş yazılır: \(paths.joined(separator: ", ")).
-            Değerleri girmek için düzenleme penceresini açın veya "Diğer ortamdan kopyala" düğmesini kullanın.
-            """
-        alert.addButton(withTitle: "Vazgeç")
-        alert.addButton(withTitle: "Yine de geç")
+        alert.messageText = String(localized: "The \(environmentName) environment has no values for these files.")
+        alert.informativeText = String(localized: """
+            If you switch, the app writes these files empty: \(paths.joined(separator: ", ")).
+            To enter the values, open the edit window or use the "Copy from Another Environment" button.
+            """)
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        alert.addButton(withTitle: String(localized: "Switch Anyway"))
         return alert.runModal() == .alertSecondButtonReturn
     }
 
@@ -67,25 +67,25 @@ enum Alerts {
         let text = warnings.keys.sorted().map { path in
             let lines = warnings[path]!.map { warning -> String in
                 switch warning {
-                case .invalidLine(let line): "satır \(line): okunamadı"
-                case .unterminatedQuote(let line): "satır \(line): tırnak kapanmıyor"
-                case .duplicateKey(let key, let line): "satır \(line): \(key) iki kez var, son değer kullanıldı"
+                case .invalidLine(let line): String(localized: "line \(line): cannot read")
+                case .unterminatedQuote(let line): String(localized: "line \(line): the quote does not close")
+                case .duplicateKey(let key, let line): String(localized: "line \(line): \(key) occurs two times. The app uses the last value.")
                 }
             }
             return "\(path)\n  " + lines.joined(separator: "\n  ")
         }
         .joined(separator: "\n\n")
-        showInfo(title: "Bazı satırlar okunamadı", message: text)
+        showInfo(title: String(localized: "Some Lines Cannot Be Read"), message: text)
     }
 
     /// Returns nil when the user cancels.
     static func chooseCopyMode() -> EntryEditor.CopyMode? {
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "Aynı anahtar bu ortamda da varsa ne olsun?"
-        alert.addButton(withTitle: "Üzerine yaz")
-        alert.addButton(withTitle: "Atla")
-        alert.addButton(withTitle: "Vazgeç")
+        alert.messageText = String(localized: "What should the app do when the same key is also in this environment?")
+        alert.addButton(withTitle: String(localized: "Overwrite"))
+        alert.addButton(withTitle: String(localized: "Skip"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         switch alert.runModal() {
         case .alertFirstButtonReturn: return .overwrite
         case .alertSecondButtonReturn: return .skipExisting
@@ -97,14 +97,14 @@ enum Alerts {
     static func choosePasteMode(environmentName: String, plan: EntryEditor.PastePlan) -> EntryEditor.CopyMode? {
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "\(plan.conflicts.count) anahtarın \(environmentName) ortamında başka bir değeri var."
-        var lines = ["Değeri değişecek anahtarlar: \(plan.conflicts.joined(separator: ", "))"]
-        if !plan.added.isEmpty { lines.append("Eklenecek anahtarlar: \(plan.added.joined(separator: ", "))") }
-        if !plan.filled.isEmpty { lines.append("Boş değeri doldurulacak anahtarlar: \(plan.filled.joined(separator: ", "))") }
+        alert.messageText = String(localized: "Keys with a different value in the \(environmentName) environment: \(plan.conflicts.count)")
+        var lines = [String(localized: "Keys that get a new value: \(plan.conflicts.joined(separator: ", "))")]
+        if !plan.added.isEmpty { lines.append(String(localized: "Keys to add: \(plan.added.joined(separator: ", "))")) }
+        if !plan.filled.isEmpty { lines.append(String(localized: "Empty keys to fill: \(plan.filled.joined(separator: ", "))")) }
         alert.informativeText = lines.joined(separator: "\n\n")
-        alert.addButton(withTitle: "Üzerine yaz")
-        alert.addButton(withTitle: "Yalnızca eksikleri ekle")
-        alert.addButton(withTitle: "Vazgeç")
+        alert.addButton(withTitle: String(localized: "Overwrite"))
+        alert.addButton(withTitle: String(localized: "Add Only Missing Keys"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         switch alert.runModal() {
         case .alertFirstButtonReturn: return .overwrite
         case .alertSecondButtonReturn: return .skipExisting
@@ -116,11 +116,11 @@ enum Alerts {
     static func confirmFillAll(keyCount: Int, sourceName: String?) -> Bool {
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "\(keyCount) eksik anahtar, olmadıkları ortamlara eklenecek."
-        alert.informativeText = sourceName.map { "Değerler \($0) ortamından alınır. Var olan değerler değişmez." }
-            ?? "Her anahtarın değeri, anahtarın olduğu ilk ortamdan alınır. Var olan değerler değişmez."
-        alert.addButton(withTitle: "Ekle")
-        alert.addButton(withTitle: "Vazgeç")
+        alert.messageText = String(localized: "Missing keys to add to the other environments: \(keyCount)")
+        alert.informativeText = sourceName.map { String(localized: "The values come from the \($0) environment. Existing values do not change.") }
+            ?? String(localized: "Each key gets its value from the first environment that has the key. Existing values do not change.")
+        alert.addButton(withTitle: String(localized: "Add"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         return alert.runModal() == .alertFirstButtonReturn
     }
 }

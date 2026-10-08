@@ -16,6 +16,8 @@ jobs:
         run: swift --version
       - name: Test
         run: swift test
+      - name: Check the translations
+        run: scripts/check-strings.sh
       - name: Build the app bundle
         run: scripts/bundle.sh
       - name: Lint the shell scripts
