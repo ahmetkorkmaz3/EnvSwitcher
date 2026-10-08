@@ -42,3 +42,69 @@ struct UpdateScheduleTests {
         #expect(UpdateSchedule.isDue(lastCheck: now.addingTimeInterval(3600), now: now))
     }
 }
+
+private struct StubHTTPClient: HTTPClient {
+    let body: String
+    var status = 200
+    func get(_ url: URL) async throws -> (Data, Int) { (Data(body.utf8), status) }
+}
+
+private struct FailingHTTPClient: HTTPClient {
+    func get(_ url: URL) async throws -> (Data, Int) { throw URLError(.notConnectedToInternet) }
+}
+
+struct UpdateCheckerTests {
+    let current = SemanticVersion("0.2.0")!
+    let page = "https://github.com/ahmetkorkmaz3/env-management/releases/tag/v0.3.0"
+
+    private func body(tag: String) -> String {
+        #"{"tag_name":"\#(tag)","html_url":"\#(page)","name":"x","assets":[]}"#
+    }
+
+    @Test func reportsANewerRelease() async throws {
+        let checker = UpdateChecker(client: StubHTTPClient(body: body(tag: "v0.3.0")))
+        let result = try await checker.check(current: current)
+        #expect(result == .available(AvailableUpdate(version: SemanticVersion("0.3.0")!, url: URL(string: page)!)))
+    }
+
+    @Test(arguments: ["v0.2.0", "v0.1.9"])
+    func reportsUpToDateForTheSameOrAnOlderRelease(tag: String) async throws {
+        let checker = UpdateChecker(client: StubHTTPClient(body: body(tag: tag)))
+        #expect(try await checker.check(current: current) == .upToDate)
+    }
+
+    @Test func rejectsABadStatus() async {
+        let checker = UpdateChecker(client: StubHTTPClient(body: "{}", status: 404))
+        await #expect(throws: UpdateError.badStatus(404)) { try await checker.check(current: current) }
+    }
+
+    @Test(arguments: ["not json", #"{"html_url":"https://x"}"#, #"{"tag_name":"latest","html_url":"https://x"}"#])
+    func rejectsAnInvalidBody(body: String) async {
+        let checker = UpdateChecker(client: StubHTTPClient(body: body))
+        await #expect(throws: UpdateError.invalidResponse) { try await checker.check(current: current) }
+    }
+
+    @Test func passesNetworkErrorsThrough() async {
+        let checker = UpdateChecker(client: FailingHTTPClient())
+        await #expect(throws: URLError.self) { try await checker.check(current: current) }
+    }
+}
+
+struct StoredUpdateTests {
+    let found = AvailableUpdate(version: SemanticVersion("0.3.0")!, url: URL(string: "https://example.com")!)
+
+    @Test func showsAStoredNewerVersion() {
+        #expect(StoredUpdate(found: found).available(current: SemanticVersion("0.2.0")!) == found)
+    }
+
+    @Test func hidesTheStoredVersionAfterTheUserInstallsIt() {
+        #expect(StoredUpdate(found: found).available(current: SemanticVersion("0.3.0")!) == nil)
+        #expect(StoredUpdate(found: found).available(current: SemanticVersion("0.4.0")!) == nil)
+    }
+
+    @Test func roundTripsThroughJSON() throws {
+        let stored = StoredUpdate(lastCheck: Date(timeIntervalSince1970: 1_800_000_000), found: found)
+        let data = try JSONEncoder().encode(stored)
+        #expect(try JSONDecoder().decode(StoredUpdate.self, from: data) == stored)
+    }
+}
