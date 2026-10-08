@@ -51,7 +51,7 @@ Bir projede birden fazla `.env` dosyası olabilir. Dosyalar iç içe klasörlerd
   - `EnvCore` (library): depo, Keychain, `.env` okuma ve yazma, tarama, fark hesabı, geçiş işlemi. SwiftUI içermez.
   - `EnvSwitcher` (executable): menü ve düzenleme penceresi. Yalnızca `EnvCore` çağırır.
   - `EnvCoreTests` (test): Swift Testing.
-- **Uygulama paketi:** `scripts/bundle.sh` bir `.app` paketi oluşturur. Bu paketin `Info.plist` dosyasında `LSUIElement=true` olur, bu nedenle Dock simgesi görünmez. Paket ad-hoc imzalanır.
+- **Uygulama paketi:** `scripts/bundle.sh` bir `.app` paketi oluşturur. Bu paketin `Info.plist` dosyasında `LSUIElement=true` olur, bu nedenle Dock simgesi görünmez. Paket bir sertifika ile veya ad-hoc imzalanır (bölüm 2.2).
 
 ### 2.1 Ön koşul: Xcode
 
@@ -64,9 +64,9 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 sudo xcodebuild -license accept
 ```
 
-### 2.2 Bilinen sınırlama: Keychain izinleri
+### 2.2 Keychain izinleri
 
-Keychain, bir kaydın erişim iznini uygulamanın kod imzasına bağlar. Ad-hoc imza her derlemede değişir. Bu nedenle her yeni derlemeden sonra macOS bir kez "izin ver" sorusu sorabilir. Bu sorun can sıkarsa, kullanıcı kendinden imzalı bir sertifika oluşturur ve `bundle.sh` bu sertifikayı kullanır.
+Bu bölüm 2026-10-08 tarihinde değişti. Yeni düzen: tüm gizli değerler tek bir Keychain kaydında durur, sürümler aynı kendinden imzalı sertifika ile imzalanır. Ayrıntı: `2026-10-08-github-release-design.md`, bölüm 2–4.
 
 ## 3. Veri modeli
 

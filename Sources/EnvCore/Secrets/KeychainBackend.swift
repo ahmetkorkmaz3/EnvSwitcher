@@ -1,7 +1,18 @@
 import Foundation
 import Security
 
-public struct KeychainSecretStore: SecretStore {
+/// The Keychain calls that VaultSecretStore needs. Tests use an in-memory fake.
+public protocol KeychainBackend: Sendable {
+    func readItem(account: String) throws -> Data?
+    func writeItem(_ data: Data, account: String) throws
+    /// Deleting an item that does not exist is not an error.
+    func deleteItem(account: String) throws
+    /// Returns the accounts of all items with the service name, without their data.
+    func listAccounts() throws -> [String]
+}
+
+/// Generic password items in the file-based login keychain.
+public struct SystemKeychainBackend: KeychainBackend {
     public let service: String
 
     public init(service: String = "EnvSwitcher") {
@@ -16,7 +27,7 @@ public struct KeychainSecretStore: SecretStore {
         ]
     }
 
-    public func read(account: String) throws -> String? {
+    public func readItem(account: String) throws -> Data? {
         var q = query(account)
         q[kSecReturnData as String] = true
         q[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -26,11 +37,10 @@ public struct KeychainSecretStore: SecretStore {
         guard status == errSecSuccess, let data = item as? Data else {
             throw SecretStoreError.keychain(status: status)
         }
-        return String(decoding: data, as: UTF8.self)
+        return data
     }
 
-    public func write(_ value: String, account: String) throws {
-        let data = Data(value.utf8)
+    public func writeItem(_ data: Data, account: String) throws {
         let status = SecItemUpdate(query(account) as CFDictionary, [kSecValueData as String: data] as CFDictionary)
         if status == errSecItemNotFound {
             var add = query(account)
@@ -42,10 +52,26 @@ public struct KeychainSecretStore: SecretStore {
         guard status == errSecSuccess else { throw SecretStoreError.keychain(status: status) }
     }
 
-    public func delete(account: String) throws {
+    public func deleteItem(account: String) throws {
         let status = SecItemDelete(query(account) as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw SecretStoreError.keychain(status: status)
         }
+    }
+
+    public func listAccounts() throws -> [String] {
+        let q: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecMatchLimit as String: kSecMatchLimitAll,
+            kSecReturnAttributes as String: true,
+        ]
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(q as CFDictionary, &result)
+        if status == errSecItemNotFound { return [] }
+        guard status == errSecSuccess, let items = result as? [[String: Any]] else {
+            throw SecretStoreError.keychain(status: status)
+        }
+        return items.compactMap { $0[kSecAttrAccount as String] as? String }
     }
 }

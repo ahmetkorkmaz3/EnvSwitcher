@@ -96,3 +96,17 @@ scripts/bundle.sh && open build/EnvSwitcher.app
 
 1. Sistem ayarlarından koyu moda geçin. Beklenen: pencere, menü ve sheet okunur kalır.
 2. Menüdeki ortam noktaları ortam renklerini gösterir.
+
+## 9. Dağıtım (spec 2026-10-08, bölüm 10.3)
+
+1. Eski Keychain kayıtları olan bir makinede yeni sürümü açın.
+   - Beklenen: gizli değerler aynı kalır. `security dump-keychain | grep -A1 '"svce"<blob>="EnvSwitcher"' | grep acct` yalnızca `vault` gösterir.
+2. Aynı sertifika ile iki farklı derleme yapın: `CODESIGN_IDENTITY="EnvSwitcher Self-Signed" scripts/bundle.sh`. Birini açın, kapatın, diğerini açın.
+   - Beklenen: Keychain sorusu çıkmaz.
+3. Temiz bir macOS kullanıcı hesabında kurulum komutunu çalıştırın.
+   - Beklenen: uygulama Gatekeeper uyarısı olmadan açılır. Keychain sorusu çıkmaz.
+4. Uygulama açıkken kurulum komutunu yeniden çalıştırın.
+   - Beklenen: uygulama kapanır ve yeni sürümle açılır.
+5. Eski bir sürüm kurun: `curl -fsSL …/install.sh | ENVSWITCHER_VERSION=<eski> sh`. `defaults delete com.ahmetkorkmaz.envswitcher storedUpdate` çalıştırın ve uygulamayı yeniden açın.
+   - Beklenen: menüde "Güncelleme var: <son sürüm>" satırı çıkar. Satır seçilince release sayfası açılır ve komut panoya kopyalanır.
+   - Uygulamayı yeniden açın. Beklenen: satır yine görünür.

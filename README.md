@@ -6,9 +6,44 @@ EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren 
 - Gizli değerler (token, şifre, anahtar) macOS Keychain içinde durur. `store.json` dosyasına girmez.
 - Bir monorepodaki tüm `.env` dosyaları birlikte veya tek tek değişir.
 
+## Kurulum
+
+Terminalde şu komutu çalıştırın:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
+```
+
+Komut son sürümü indirir, SHA-256 değerini kontrol eder, `/Applications` içine kurar ve uygulamayı açar. Gereksinim: macOS 14 veya üstü. Apple Silicon ve Intel desteklenir.
+
+**Güncelleme:** Aynı komutu yeniden çalıştırın. Yeni bir sürüm çıkınca menüde "Güncelleme var" satırı görünür. Bu satır komutu panoya kopyalar.
+
+**Belirli bir sürüm:** `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh`
+
+**Elle kurulum:**
+
+1. [Releases](https://github.com/ahmetkorkmaz3/EnvSwitcher/releases) sayfasından `EnvSwitcher-X.Y.Z.zip` dosyasını indirin.
+2. Zip dosyasını açın. `EnvSwitcher.app` dosyasını `/Applications` içine taşıyın.
+3. Uygulamayı açın. macOS "Apple doğrulayamadı" uyarısını gösterir. **Bitti** düğmesine basın.
+4. Sistem Ayarları → Gizlilik ve Güvenlik sayfasını açın. Sayfanın altında **Yine de Aç** düğmesine basın.
+
+Uygulama notarize edilmedi, bu nedenle tarayıcıdan indirilen dosyada bu uyarı çıkar. Kurulum komutu bu uyarıyı göstermez.
+
+**Kaldırma:**
+
+```sh
+osascript -e 'quit app "EnvSwitcher"'
+rm -rf /Applications/EnvSwitcher.app
+rm -rf ~/Library/Application\ Support/EnvSwitcher
+security delete-generic-password -s EnvSwitcher -a vault
+defaults delete com.ahmetkorkmaz.envswitcher
+```
+
+Bu komutlar `.env` dosyalarınızı değiştirmez.
+
 ## Hızlı başlangıç
 
-1. Uygulamayı derleyin ve açın (bkz. [Derleme](#derleme)). Menü çubuğunda `EnvSwitcher` yazısı görünür.
+1. Uygulamayı kurun (bkz. [Kurulum](#kurulum)) ve açın. Menü çubuğunda `EnvSwitcher` yazısı görünür.
 2. Menüden **Proje Ekle…** seçin. Proje klasörünü seçin veya pencereye sürükleyin.
 3. Bulunan `.env` dosyalarını kontrol edin. **Ekle** düğmesine basın. Dosyaların mevcut içeriği `local` ortamına aktarılır.
 4. **Yönet…** penceresinde bir dosya seçin. Üstten **Karşılaştır** görünümünü seçin.
@@ -78,7 +113,8 @@ EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren 
 |---|---|
 | Projeler, ortamlar, gizli olmayan değerler | `~/Library/Application Support/EnvSwitcher/store.json` |
 | Son yedek | `~/Library/Application Support/EnvSwitcher/store.json.bak` |
-| Gizli değerler | Keychain, servis adı `EnvSwitcher` |
+| Gizli değerler | Keychain, servis adı `EnvSwitcher`, hesap adı `vault` (tek kayıt) |
+| Güncelleme kontrolü | `defaults read com.ahmetkorkmaz.envswitcher storedUpdate` |
 | Geri alma başarısız olursa eski içerik | `~/Library/Application Support/EnvSwitcher/recovery/` |
 
 `store.json` bozulursa uygulama yedeği yükler ve bir uyarı gösterir.
@@ -105,16 +141,19 @@ Uygulamayı kalıcı kullanmak için `build/EnvSwitcher.app` klasörünü `/Appl
 **Gerçek Keychain testi:**
 
 ```sh
-ENVSWITCHER_KEYCHAIN_TESTS=1 swift test --filter SecretsTests
+ENVSWITCHER_KEYCHAIN_TESTS=1 swift test --filter VaultKeychainTests
 ```
 
-### Keychain izin sorusu
+### İmza ve Keychain izin sorusu
 
-Ad-hoc imza her derlemede değişir. Bu nedenle macOS yeni bir derlemeden sonra Keychain izni sorabilir. Bu soruyu önlemek için kendinden imzalı bir sertifika oluşturun (Anahtar Zinciri Erişimi → Sertifika Asistanı → Sertifika Oluştur, tür: Kod İmzalama). Sonra şu komutu kullanın:
+Keychain bir kaydı oluşturan uygulamayı imzası ile tanır. Ad-hoc imza her derlemede değişir. Bu nedenle ad-hoc bir derlemeden sonra macOS bir kez izin sorar. Tüm gizli değerler tek bir kayıtta durur, bu nedenle soru bir kez çıkar.
 
-```sh
-CODESIGN_IDENTITY="EnvSwitcher Dev" scripts/bundle.sh
-```
+Bu soruyu önlemek için release sürümlerinin sertifikası ile imzalayın:
+
+1. Sertifikayı bir kez oluşturun: `scripts/make-signing-cert.sh`. Sertifika zaten varsa ve `.p12` dosyası sizdeyse, dosyayı çift tıklayıp giriş Keychain'ine alın.
+2. Derleyin: `CODESIGN_IDENTITY="EnvSwitcher Self-Signed" scripts/bundle.sh`
+
+Sürüm çıkarma adımları: [`docs/release.md`](docs/release.md).
 
 ## Proje yapısı
 
@@ -125,3 +164,11 @@ CODESIGN_IDENTITY="EnvSwitcher Dev" scripts/bundle.sh
 | `Tests/EnvCoreTests` | Birim testleri. |
 | `docs/manual-test.md` | Her sürümden önce uygulanacak elle test listesi. |
 | `docs/superpowers/specs/` | Tasarım dokümanı. |
+| `scripts/` | Derleme, ikon, sertifika ve CHANGELOG betikleri. |
+| `install.sh` | Kurulum ve güncelleme betiği. |
+| `.github/workflows/` | CI ve release iş akışları. |
+| `docs/release.md` | Sürüm çıkarma adımları. |
+
+## Lisans
+
+MIT. Bkz. [LICENSE](LICENSE).
