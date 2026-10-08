@@ -26,7 +26,7 @@ Bir projede birden fazla `.env` dosyası olabilir. Dosyalar iç içe klasörlerd
 
 ### 1.3 Referans proje
 
-`~/work/karaca/karaca-storefront` bir pnpm/turbo monorepo yapısıdır. Tasarım bu projeye göre kontrol edildi:
+`~/work/my-app` bir pnpm/turbo monorepo yapısıdır. Tasarım bu projeye göre kontrol edildi:
 
 - `apps/` altında 11 Next.js uygulaması vardır.
 - 9 uygulamanın `.env.local` dosyası vardır. 10 uygulamanın `.env.example` dosyası vardır.
@@ -115,7 +115,7 @@ Kullanıcı öneriyi pencerede değiştirir.
 ### 3.5 Üretilen dosyanın biçimi
 
 ```
-# EnvSwitcher tarafından üretildi — proje: karaca-storefront, ortam: test
+# EnvSwitcher tarafından üretildi — proje: my-app, ortam: test
 # Bu dosyayı elle düzenlerseniz, ortam değişirken uygulama sorar.
 NEXT_PUBLIC_APP_ENV=test
 NEXT_PUBLIC_API_BASE_URL=https://test-api.example
@@ -181,7 +181,7 @@ Bir geçişin **kapsamı** iki türlü olabilir:
 
 Akış iki kapsamda da aynıdır:
 
-1. **Korumalı ortam kontrolü.** Hedef ortam korumalıysa uygulama bir onay penceresi gösterir. Örnek: "karaca-storefront projesi CANLI ortama geçecek. 9 dosya değişecek." İptal ederseniz hiçbir dosya değişmez.
+1. **Korumalı ortam kontrolü.** Hedef ortam korumalıysa uygulama bir onay penceresi gösterir. Örnek: "my-app projesi CANLI ortama geçecek. 9 dosya değişecek." İptal ederseniz hiçbir dosya değişmez.
 2. **Elle değişiklik kontrolü.** Uygulama kapsamdaki her dosyayı okur ve SHA-256 özetini `lastWrittenHash` ile karşılaştırır.
 
    | Durum | Sonuç |
@@ -219,12 +219,12 @@ Onaylanan çizim: `.superpowers/brainstorm/11861-1791392457/content/ui-layout-v3
 
 ### 7.1 Menü çubuğu
 
-**Başlık:** Son geçiş yapılan projenin adı ve görünen ortamı yazılır. Önde ortam renginde bir nokta olur. Örnek: `● karaca-storefront · test`.
+**Başlık:** Son geçiş yapılan projenin adı ve görünen ortamı yazılır. Önde ortam renginde bir nokta olur. Örnek: `● my-app · test`.
 
 **Menü yapısı:**
 
 ```
-karaca-storefront          karışık ›
+my-app          karışık ›
   ├─ Tüm dosyalar
   │    ● local
   │    ● test
@@ -334,11 +334,11 @@ Her `EnvCore` birimi bir sorumluluk taşır ve test için protokol arkasında du
 
 - UI testi yazılmaz.
 - SwiftUI önizlemeleri ana görünümler için örnek verilerle çalışır.
-- Elle kontrol listesi `docs/manual-test.md` dosyasında durur. İlk madde: karaca-storefront projesini ekle, tüm dosyaları `test` ortamına geçir, tek bir dosyayı `canli` ortamına geçir, sonra `local` ortamına dön.
+- Elle kontrol listesi `docs/manual-test.md` dosyasında durur. İlk madde: my-app projesini ekle, tüm dosyaları `test` ortamına geçir, tek bir dosyayı `canli` ortamına geçir, sonra `local` ortamına dön.
 
 ## 11. Başarı ölçütleri
 
-1. Kullanıcı karaca-storefront projesini bir dakikadan kısa sürede ekler. Tarama 9 `.env.local` dosyasını bulur ve worktree kopyalarını atlar.
+1. Kullanıcı my-app projesini bir dakikadan kısa sürede ekler. Tarama 9 `.env.local` dosyasını bulur ve worktree kopyalarını atlar.
 2. Menüden iki tıkla projedeki tüm dosyalar başka bir ortama geçer.
 3. Menüden üç tıkla tek bir dosya başka bir ortama geçer.
 4. Elle değiştirilmiş bir dosya, kullanıcıya sorulmadan üzerine yazılmaz.

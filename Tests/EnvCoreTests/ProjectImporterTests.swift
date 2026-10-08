@@ -12,7 +12,7 @@ struct ProjectImporterTests {
         let secrets = InMemorySecretStore()
 
         let result = try ProjectImporter(secrets: secrets).makeProject(
-            name: "karaca",
+            name: "my-app",
             root: root,
             relativePaths: ["apps/cart/.env.local", "apps/shell/.env.local"],
             environments: envs,
@@ -20,7 +20,7 @@ struct ProjectImporterTests {
         )
 
         let project = result.project
-        #expect(project.name == "karaca")
+        #expect(project.name == "my-app")
         #expect(project.rootPath == root.path)
         #expect(project.environments == envs)
         #expect(project.targets.map(\.relativePath) == ["apps/cart/.env.local", "apps/shell/.env.local"])
@@ -44,7 +44,7 @@ struct ProjectImporterTests {
         try TempDir.write("A=1\nAPI_TOKEN=s3cret-value\n", to: ".env", in: root)
         let envs = EnvEnvironment.defaults()
         let project = try ProjectImporter(secrets: InMemorySecretStore()).makeProject(
-            name: "karaca", root: root, relativePaths: [".env"], environments: envs, importInto: envs[0].id
+            name: "my-app", root: root, relativePaths: [".env"], environments: envs, importInto: envs[0].id
         ).project
 
         let json = String(decoding: try JSONEncoder().encode(Store(projects: [project])), as: UTF8.self)

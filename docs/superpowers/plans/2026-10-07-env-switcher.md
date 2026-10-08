@@ -1217,7 +1217,7 @@ struct StoreRepositoryTests {
 
     @Test func saveThenLoadReturnsSameStore() throws {
         let repo = StoreRepository(directory: try TempDir.make().appendingPathComponent("nested"))
-        let store = sampleStore(name: "karaca")
+        let store = sampleStore(name: "my-app")
         try repo.save(store)
         #expect(try repo.load() == StoreLoadResult(store: store, notice: nil))
     }
@@ -1588,7 +1588,7 @@ struct ProjectImporterTests {
         let secrets = InMemorySecretStore()
 
         let result = try ProjectImporter(secrets: secrets).makeProject(
-            name: "karaca",
+            name: "my-app",
             root: root,
             relativePaths: ["apps/cart/.env.local", "apps/shell/.env.local"],
             environments: envs,
@@ -1596,7 +1596,7 @@ struct ProjectImporterTests {
         )
 
         let project = result.project
-        #expect(project.name == "karaca")
+        #expect(project.name == "my-app")
         #expect(project.rootPath == root.path)
         #expect(project.environments == envs)
         #expect(project.targets.map(\.relativePath) == ["apps/cart/.env.local", "apps/shell/.env.local"])
@@ -1743,7 +1743,7 @@ struct ProjectFixture {
         try FileManager.default.createDirectory(at: root.appendingPathComponent("apps/cart"), withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: root.appendingPathComponent("apps/shell"), withIntermediateDirectories: true)
         project = Project(
-            name: "karaca",
+            name: "my-app",
             rootPath: root.path,
             environments: envs,
             targets: [EnvTarget(relativePath: "apps/cart/.env.local"), EnvTarget(relativePath: "apps/shell/.env.local")]
@@ -1782,7 +1782,7 @@ import Testing
 @testable import EnvCore
 
 struct SwitchPlannerTests {
-    private let header = "# EnvSwitcher tarafından üretildi — proje: karaca, ortam: test\n# Bu dosyayı elle düzenlerseniz, ortam değişirken uygulama sorar.\n"
+    private let header = "# EnvSwitcher tarafından üretildi — proje: my-app, ortam: test\n# Bu dosyayı elle düzenlerseniz, ortam değişirken uygulama sorar.\n"
 
     @Test func prepareBuildsHeaderAndResolvesSecrets() throws {
         var f = try ProjectFixture()
@@ -5138,27 +5138,27 @@ Her sürümden önce bu listeyi uygulayın. Gerçek bir repo yerine bir kopya ku
 ## Hazırlık
 
 ```sh
-rm -rf /tmp/karaca-copy
+rm -rf /tmp/my-app-copy
 rsync -a --exclude node_modules --exclude .git --exclude .next --exclude .turbo \
-  ~/work/karaca/karaca-storefront/ /tmp/karaca-copy/
+  ~/work/my-app/ /tmp/my-app-copy/
 scripts/bundle.sh && open build/EnvSwitcher.app
 ```
 
 ## 1. Uçtan uca geçiş (spec 10.3, ilk madde)
 
-1. Menüden "Proje Ekle…" seçin ve `/tmp/karaca-copy` klasörünü seçin.
+1. Menüden "Proje Ekle…" seçin ve `/tmp/my-app-copy` klasörünü seçin.
    - Beklenen: 9 `.env.local` dosyası seçili, `.env.example` dosyaları seçili değil.
    - Beklenen: `.claude/worktrees` altındaki dosyalar listede yok.
-2. "Ekle" düğmesine basın. Menü çubuğu `karaca-copy · local` gösterir.
+2. "Ekle" düğmesine basın. Menü çubuğu `my-app-copy · local` gösterir.
 3. Pencerede `apps/cart/.env.local` seçin, `test` segmentine geçin, "Diğer ortamdan kopyala → local" seçin, sonra `NEXT_PUBLIC_APP_ENV` değerini `test` yapın. Diğer 8 dosya için de "Diğer ortamdan kopyala → local" uygulayın.
 4. Menüden projeyi açın, "Tüm dosyalar → test" seçin.
    - Beklenen: 9 dosyanın hepsi yeniden yazılır. `apps/cart/.env.local` içinde `NEXT_PUBLIC_APP_ENV=test` var.
-   - Beklenen: menü çubuğu `karaca-copy · test` gösterir.
+   - Beklenen: menü çubuğu `my-app-copy · test` gösterir.
 5. Menüden "Dosyalar → apps/checkout/.env.local → canli" seçin.
    - Beklenen: Korumalı ortam onayı çıkar: "1 dosya değişecek." "Geç" düğmesine basın.
-   - Beklenen: menü çubuğu `karaca-copy · karışık` gösterir.
+   - Beklenen: menü çubuğu `my-app-copy · karışık` gösterir.
 6. Menüden "Tüm dosyalar → local" seçin.
-   - Beklenen: tüm dosyalar `local` olur. Menü çubuğu `karaca-copy · local` gösterir.
+   - Beklenen: tüm dosyalar `local` olur. Menü çubuğu `my-app-copy · local` gösterir.
 
 ## 2. Elle değişiklik
 
@@ -5170,10 +5170,10 @@ scripts/bundle.sh && open build/EnvSwitcher.app
 
 ## 3. Hata durumları
 
-1. `rm -rf /tmp/karaca-copy/apps/plp` çalıştırın ve "Tüm dosyalar → test" seçin.
+1. `rm -rf /tmp/my-app-copy/apps/plp` çalıştırın ve "Tüm dosyalar → test" seçin.
    - Beklenen: hata mesajı `apps/plp/.env.local` dosyasını adıyla gösterir. Hiçbir dosya değişmez.
-2. `mv /tmp/karaca-copy /tmp/karaca-moved` çalıştırın ve menüyü açın.
-   - Beklenen: proje "Klasör bulunamadı" gösterir. "Klasörü yeniden seç…" ile `/tmp/karaca-moved` seçince proje yeniden çalışır.
+2. `mv /tmp/my-app-copy /tmp/my-app-moved` çalıştırın ve menüyü açın.
+   - Beklenen: proje "Klasör bulunamadı" gösterir. "Klasörü yeniden seç…" ile `/tmp/my-app-moved` seçince proje yeniden çalışır.
 3. Uygulamayı kapatın. `~/Library/Application Support/EnvSwitcher/store.json` dosyasının başına `x` yazın. Uygulamayı açın.
    - Beklenen: "Depo geri yüklendi" uyarısı çıkar ve projeler görünür.
 

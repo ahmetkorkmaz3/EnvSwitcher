@@ -16,7 +16,7 @@ struct StoreRepositoryTests {
 
     @Test func saveThenLoadReturnsSameStore() throws {
         let repo = StoreRepository(directory: try TempDir.make().appendingPathComponent("nested"))
-        let store = sampleStore(name: "karaca")
+        let store = sampleStore(name: "my-app")
         try repo.save(store)
         #expect(try repo.load() == StoreLoadResult(store: store, notice: nil))
     }

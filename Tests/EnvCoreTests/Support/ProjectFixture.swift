@@ -14,7 +14,7 @@ struct ProjectFixture {
         try FileManager.default.createDirectory(at: root.appendingPathComponent("apps/cart"), withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: root.appendingPathComponent("apps/shell"), withIntermediateDirectories: true)
         project = Project(
-            name: "karaca",
+            name: "my-app",
             rootPath: root.path,
             environments: envs,
             targets: [EnvTarget(relativePath: "apps/cart/.env.local"), EnvTarget(relativePath: "apps/shell/.env.local")]
