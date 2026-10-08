@@ -111,4 +111,16 @@ enum Alerts {
         default: return nil
         }
     }
+
+    /// Asks before every missing key is copied. `sourceName` is nil when each key uses its first filled environment.
+    static func confirmFillAll(keyCount: Int, sourceName: String?) -> Bool {
+        NSApp.activate()
+        let alert = NSAlert()
+        alert.messageText = "\(keyCount) eksik anahtar, olmadıkları ortamlara eklenecek."
+        alert.informativeText = sourceName.map { "Değerler \($0) ortamından alınır. Var olan değerler değişmez." }
+            ?? "Her anahtarın değeri, anahtarın olduğu ilk ortamdan alınır. Var olan değerler değişmez."
+        alert.addButton(withTitle: "Ekle")
+        alert.addButton(withTitle: "Vazgeç")
+        return alert.runModal() == .alertFirstButtonReturn
+    }
 }

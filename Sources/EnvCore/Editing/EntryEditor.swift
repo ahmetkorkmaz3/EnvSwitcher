@@ -189,6 +189,43 @@ public struct EntryEditor: Sendable {
         return updated
     }
 
+    /// Where `fillMissing` takes the value of a key from.
+    public enum FillSource: Equatable, Sendable {
+        /// The first environment, in project order, that has the key.
+        case firstAvailable
+        case environment(UUID)
+    }
+
+    public struct FillResult: Sendable {
+        public var project: Project
+        /// Keys that were added to one or more environments.
+        public var filled: [String]
+        /// Missing keys that the source environment does not have.
+        public var skipped: [String]
+    }
+
+    /// Adds each missing key to every environment that does not have it. Existing values do not change.
+    /// A key that is secret in any environment is secret in the new environments too.
+    public func fillMissing(_ rows: [ComparisonRow], from source: FillSource, in project: Project, targetId: UUID) throws -> FillResult {
+        var result = FillResult(project: project, filled: [], skipped: [])
+        for row in rows where row.status == .missing {
+            let value: String? = switch source {
+            case .firstAvailable: project.environments.lazy.compactMap { row.values[$0.id] }.first
+            case .environment(let id): row.values[id]
+            }
+            guard let value else {
+                result.skipped.append(row.key)
+                continue
+            }
+            for environment in project.environments where row.values[environment.id] == nil {
+                result.project = try upsertValue(
+                    value, key: row.key, isSecret: row.isSecret, in: result.project, targetId: targetId, environmentId: environment.id)
+            }
+            result.filled.append(row.key)
+        }
+        return result
+    }
+
     private func account(_ project: Project, _ targetId: UUID, _ environmentId: UUID, _ key: String) -> String {
         SecretAccount.make(projectId: project.id, targetId: targetId, environmentId: environmentId, key: key)
     }

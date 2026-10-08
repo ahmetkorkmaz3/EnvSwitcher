@@ -63,6 +63,17 @@ struct CompareView: View {
             .pickerStyle(.segmented)
             .labelsHidden()
             .fixedSize()
+            if missing > 0, let project {
+                Menu("Tüm eksiklere kopyala") {
+                    Button("Her anahtar için ilk dolu ortamdan") { fillAllMissing(from: .firstAvailable, in: project) }
+                    Divider()
+                    ForEach(project.environments) { source in
+                        Button("\(source.name) değerlerini kopyala") { fillAllMissing(from: .environment(source.id), in: project) }
+                    }
+                }
+                .fixedSize()
+                .help("Eksik anahtarların hepsini, olmadıkları ortamlara ekler. Var olan değerler değişmez.")
+            }
             Spacer()
             Text("Bir değeri değiştirip Return tuşuna basın. Eksik bir hücreye yazınca anahtar o ortama eklenir.")
                 .font(.callout)
@@ -171,14 +182,29 @@ struct CompareView: View {
     }
 
     private func fillMissing(_ row: ComparisonRow, from source: UUID, in project: Project) {
-        guard let value = row.values[source] else { return }
         state.apply {
-            var updated = project
-            for environment in project.environments where row.values[environment.id] == nil {
-                updated = try state.entryEditor.upsertValue(
-                    value, key: row.key, isSecret: row.isSecret, in: updated, targetId: targetId, environmentId: environment.id)
+            try state.entryEditor.fillMissing([row], from: .environment(source), in: project, targetId: targetId).project
+        }
+    }
+
+    private func fillAllMissing(from source: EntryEditor.FillSource, in project: Project) {
+        let missingRows = rows.filter { $0.status == .missing }
+        let sourceName: String? = switch source {
+        case .firstAvailable: nil
+        case .environment(let id): project.environment(id: id)?.name
+        }
+        guard Alerts.confirmFillAll(keyCount: missingRows.count, sourceName: sourceName) else { return }
+        do {
+            let result = try state.entryEditor.fillMissing(missingRows, from: source, in: project, targetId: targetId)
+            state.replace(result.project)
+            if !result.skipped.isEmpty {
+                Alerts.showInfo(
+                    title: "\(result.filled.count) anahtar eklendi, \(result.skipped.count) anahtar atlandı",
+                    message: "\(sourceName ?? "") ortamında bu anahtarlar yok: \(result.skipped.joined(separator: ", "))"
+                )
             }
-            return updated
+        } catch {
+            state.report(error)
         }
     }
 }

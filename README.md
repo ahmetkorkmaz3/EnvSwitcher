@@ -49,6 +49,9 @@ EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren 
 - **Eksik** ve **Farklı** filtreleri yalnızca ilgili satırları gösterir.
 - Eksik bir hücreye değer yazıp Return tuşuna basın. Anahtar o ortama eklenir.
 - **Eksiklere kopyala** bir ortamın değerini, anahtarın olmadığı tüm ortamlara yazar.
+- **Tüm eksiklere kopyala** aynı işi tüm eksik anahtarlar için tek seferde yapar. Önce onay ister. Var olan değerler değişmez.
+  - **Her anahtar için ilk dolu ortamdan**: her anahtarın değeri, anahtarın olduğu ilk ortamdan alınır.
+  - **<ortam> değerlerini kopyala**: değerler seçilen ortamdan alınır. Bu ortamda olmayan anahtarlar atlanır ve listelenir.
 - Gizli değerler `••••` olarak görünür. Satırdaki göz düğmesi değerleri gösterir.
 - Düzenle görünümünde bir ortamda eksik anahtar varsa, alt çubukta "N anahtar bu ortamda eksik" düğmesi çıkar.
 

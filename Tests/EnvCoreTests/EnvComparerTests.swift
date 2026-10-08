@@ -64,4 +64,31 @@ struct EnvComparerTests {
         #expect(EnvComparer.missingKeys(in: f.local, target: target, project: f.project) == ["ONLY_TEST"])
         #expect(EnvComparer.missingKeys(in: f.canli, target: target, project: f.project) == ["ONLY_LOCAL", "ONLY_TEST"])
     }
+
+    @Test func fillMissingFromFirstAvailableAddsEveryMissingKey() throws {
+        let f = try fixture()
+        let rows = try EnvComparer(secrets: f.secrets).compare(project: f.project, targetId: f.cart.id)
+        let result = try EntryEditor(secrets: f.secrets).fillMissing(rows, from: .firstAvailable, in: f.project, targetId: f.cart.id)
+
+        #expect(result.filled == ["ONLY_LOCAL", "ONLY_TEST"])
+        #expect(result.skipped.isEmpty)
+        let after = try EnvComparer(secrets: f.secrets).compare(project: result.project, targetId: f.cart.id)
+        #expect(after.allSatisfy { $0.status != .missing })
+        #expect(after[2].values == [f.local: "x", f.test: "x", f.canli: "x"])
+        #expect(after[3].values == [f.local: "y", f.test: "y", f.canli: "y"])
+        #expect(after[1].values == [f.local: "t-local", f.test: "t-test", f.canli: "t-canli"])
+    }
+
+    @Test func fillMissingFromOneEnvironmentSkipsKeysItDoesNotHave() throws {
+        var f = try fixture()
+        f.setEntries(f.project.targets[0].entries(for: f.local) + [EnvEntry(key: "SECRET_KEY", value: nil, isSecret: true)], target: f.cart, env: f.local)
+        try f.secrets.write("s", account: f.account(f.cart, f.local, "SECRET_KEY"))
+        let rows = try EnvComparer(secrets: f.secrets).compare(project: f.project, targetId: f.cart.id)
+        let result = try EntryEditor(secrets: f.secrets).fillMissing(rows, from: .environment(f.local), in: f.project, targetId: f.cart.id)
+
+        #expect(result.filled.contains("SECRET_KEY"))
+        #expect(result.skipped == ["ONLY_TEST"])
+        #expect(result.project.targets[0].entries(for: f.canli).last == EnvEntry(key: "SECRET_KEY", value: nil, isSecret: true))
+        #expect(try f.secrets.read(account: f.account(f.cart, f.canli, "SECRET_KEY")) == "s")
+    }
 }

@@ -75,7 +75,11 @@ scripts/bundle.sh && open build/EnvSwitcher.app
    - Beklenen: anahtar `canli` ortamına eklenir.
 5. Gizli bir anahtarı eksik bir ortama kopyalayın.
    - Beklenen: yeni değer de gizli olur. `store.json` içinde değer görünmez.
-6. **Düzenle** görünümüne dönün ve eksik anahtarı olan bir ortam seçin.
+6. Birkaç anahtarı yalnızca `local` ortamına, birini yalnızca `test` ortamına ekleyin. Üst çubukta **Tüm eksiklere kopyala → Her anahtar için ilk dolu ortamdan** seçin ve **Ekle** düğmesine basın.
+   - Beklenen: **Eksik** filtresi 0 gösterir. Var olan değerler değişmez.
+7. Aynı durumu yeniden kurun ve **Tüm eksiklere kopyala → local değerlerini kopyala** seçin.
+   - Beklenen: `local` anahtarları eklenir. "1 anahtar atlandı" uyarısı yalnızca `test` anahtarını listeler.
+8. **Düzenle** görünümüne dönün ve eksik anahtarı olan bir ortam seçin.
    - Beklenen: alt çubukta "N anahtar bu ortamda eksik" düğmesi çıkar. Düğme Karşılaştır görünümünü Eksik filtresiyle açar.
 
 ## 7. Panodan yapıştırma
