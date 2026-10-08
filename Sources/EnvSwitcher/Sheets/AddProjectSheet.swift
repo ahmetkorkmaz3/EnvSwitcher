@@ -16,8 +16,8 @@ struct AddProjectSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Proje Ekle").font(.title2.bold())
-            Text("Bir klasörü buraya sürükleyin veya seçin. Uygulama .env dosyalarını otomatik bulur.")
+            Text("Add Project").font(.title2.bold())
+            Text("Drag a folder here or choose one. The app finds the .env files.")
                 .foregroundStyle(.secondary)
             dropZone
             if root != nil {
@@ -25,18 +25,18 @@ struct AddProjectSheet: View {
                 form
             }
             if let existingProject {
-                Label("Bu klasör zaten \(existingProject.name) projesinde. Başka bir klasör seçin.", systemImage: "xmark.octagon.fill")
+                Label("This folder is already in the project \(existingProject.name). Choose a different folder.", systemImage: "xmark.octagon.fill")
                     .symbolRenderingMode(.multicolor)
                     .font(.callout)
             }
             if root != nil, files.isEmpty {
-                Label("Bu klasörde .env dosyası bulunamadı.", systemImage: "info.circle")
+                Label("This folder has no .env files.", systemImage: "info.circle")
                     .foregroundStyle(.secondary)
                     .font(.callout)
             }
             if !trackedFiles.isEmpty {
                 Label(
-                    "Bu dosyalar git tarafından izleniyor. canli değerler commit'e girebilir: \(trackedFiles.joined(separator: ", "))",
+                    "Git tracks these files. Values from canli can get into a commit: \(trackedFiles.joined(separator: ", "))",
                     systemImage: "exclamationmark.triangle.fill"
                 )
                 .symbolRenderingMode(.multicolor)
@@ -44,9 +44,9 @@ struct AddProjectSheet: View {
             }
             HStack {
                 Spacer()
-                Button("Vazgeç", role: .cancel) { dismiss() }
+                Button("Cancel", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button("Ekle") { add() }
+                Button("Add") { add() }
                     .keyboardShortcut(.defaultAction)
                     .disabled(!canAdd)
             }
@@ -68,11 +68,11 @@ struct AddProjectSheet: View {
     private var dropZone: some View {
         HStack {
             Image(systemName: "folder")
-            Text(root?.path(percentEncoded: false) ?? "Klasör seçilmedi")
+            Text(root.map { $0.path(percentEncoded: false) } ?? String(localized: "No folder selected"))
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer()
-            Button(root == nil ? "Seç…" : "Değiştir…") {
+            Button(root == nil ? "Choose…" : "Change…") {
                 if let url = Panels.chooseFolder() { choose(url) }
             }
         }
@@ -91,13 +91,13 @@ struct AddProjectSheet: View {
 
     private var fileList: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Bulunan dosyalar (\(files.count))").font(.headline)
+            Text("Files Found (\(files.count))").font(.headline)
             List(files, id: \.relativePath) { file in
                 Toggle(isOn: selectionBinding(file.relativePath)) {
                     HStack {
                         Text(file.relativePath).font(.system(.body, design: .monospaced))
                         Spacer()
-                        Text("\(file.keyCount) anahtar").foregroundStyle(.secondary)
+                        Text("Keys: \(file.keyCount)").foregroundStyle(.secondary)
                     }
                 }
                 .toggleStyle(.checkbox)
@@ -110,11 +110,11 @@ struct AddProjectSheet: View {
     private var form: some View {
         Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 10, verticalSpacing: 10) {
             GridRow {
-                Text("Proje adı").gridColumnAlignment(.trailing)
-                TextField("", text: $name)
+                Text("Project Name").gridColumnAlignment(.trailing)
+                TextField(String(), text: $name)
             }
             GridRow {
-                Text("Ortamlar")
+                Text("Environments")
                 HStack(spacing: 6) {
                     ForEach(environments) { environment in
                         Text(environment.isProtected ? "\(environment.name) 🔒" : environment.name)
@@ -122,24 +122,25 @@ struct AddProjectSheet: View {
                             .padding(.vertical, 2)
                             .background(environment.color.color.opacity(0.18), in: Capsule())
                             .contextMenu {
-                                Button("Sil", role: .destructive) { removeEnvironment(environment.id) }
+                                Button("Delete", role: .destructive) { removeEnvironment(environment.id) }
                                     .disabled(environments.count == 1)
                             }
                     }
-                    TextField("yeni ortam", text: $newEnvironmentName)
+                    TextField("new environment", text: $newEnvironmentName)
                         .frame(width: 100)
                         .onSubmit(addEnvironment)
                 }
             }
             GridRow {
-                Text("Mevcut içerik")
+                Text("Current Content")
                 HStack {
-                    Picker("", selection: $importEnvironmentId) {
+                    LocalizedFragment("Import into")
+                    Picker(String(), selection: $importEnvironmentId) {
                         ForEach(environments) { Text($0.name).tag(UUID?.some($0.id)) }
                     }
                     .labelsHidden()
                     .fixedSize()
-                    Text("ortamına aktarılsın")
+                    LocalizedFragment("environment")
                 }
             }
         }
@@ -215,5 +216,19 @@ struct AddProjectSheet: View {
         } catch {
             state.report(error)
         }
+    }
+}
+
+/// One part of a sentence around a control. A language can leave a part empty, because the word order
+/// differs ("Import into [x] environment" and "[x] ortamına aktarılsın"). An empty part takes no space.
+private struct LocalizedFragment: View {
+    let text: String
+
+    init(_ key: String.LocalizationValue) {
+        text = String(localized: key)
+    }
+
+    var body: some View {
+        if !text.isEmpty { Text(verbatim: text) }
     }
 }

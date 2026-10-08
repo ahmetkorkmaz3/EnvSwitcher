@@ -55,27 +55,27 @@ struct CompareView: View {
         let missing = rows.filter { $0.status == .missing }.count
         let different = rows.filter { $0.status == .different }.count
         return HStack {
-            Picker("Göster", selection: $filter) {
-                Text("Tümü (\(rows.count))").tag(CompareFilter.all)
-                Text("Eksik (\(missing))").tag(CompareFilter.missing)
-                Text("Farklı (\(different))").tag(CompareFilter.different)
+            Picker("Show", selection: $filter) {
+                Text("All (\(rows.count))").tag(CompareFilter.all)
+                Text("Missing (\(missing))").tag(CompareFilter.missing)
+                Text("Different (\(different))").tag(CompareFilter.different)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
             .fixedSize()
             if missing > 0, let project {
-                Menu("Tüm eksiklere kopyala") {
-                    Button("Her anahtar için ilk dolu ortamdan") { fillAllMissing(from: .firstAvailable, in: project) }
+                Menu("Copy to All Missing") {
+                    Button("From the First Filled Environment of Each Key") { fillAllMissing(from: .firstAvailable, in: project) }
                     Divider()
                     ForEach(project.environments) { source in
-                        Button("\(source.name) değerlerini kopyala") { fillAllMissing(from: .environment(source.id), in: project) }
+                        Button("Copy the \(source.name) Values") { fillAllMissing(from: .environment(source.id), in: project) }
                     }
                 }
                 .fixedSize()
-                .help("Eksik anahtarların hepsini, olmadıkları ortamlara ekler. Var olan değerler değişmez.")
+                .help("Adds all missing keys to the environments that do not have them. Existing values do not change.")
             }
             Spacer()
-            Text("Bir değeri değiştirip Return tuşuna basın. Eksik bir hücreye yazınca anahtar o ortama eklenir.")
+            Text("Change a value and press Return. When you type in a missing cell, the app adds the key to that environment.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
@@ -88,19 +88,19 @@ struct CompareView: View {
     private var emptyState: some View {
         switch filter {
         case .missing:
-            ContentUnavailableView("Eksik anahtar yok", systemImage: "checkmark.circle", description: Text("Her anahtar tüm ortamlarda var."))
+            ContentUnavailableView("No Missing Keys", systemImage: "checkmark.circle", description: Text("All environments have every key."))
         case .different:
-            ContentUnavailableView("Farklı değer yok", systemImage: "equal.circle", description: Text("Tüm ortamlarda değerler aynı."))
+            ContentUnavailableView("No Different Values", systemImage: "equal.circle", description: Text("The values are the same in all environments."))
         case .all:
-            ContentUnavailableView("Anahtar yok", systemImage: "doc.text", description: Text("Bu dosyada hiçbir ortamda anahtar yok."))
+            ContentUnavailableView("No Keys", systemImage: "doc.text", description: Text("No environment has keys for this file."))
         }
     }
 
     private func grid(_ project: Project) -> some View {
         Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 10, verticalSpacing: 8) {
             GridRow {
-                Text("")
-                Text("Anahtar")
+                Text(verbatim: "")
+                Text("Key")
                 ForEach(project.environments) { environment in
                     HStack(spacing: 4) {
                         Circle().fill(environment.color.color).frame(width: 8, height: 8)
@@ -108,7 +108,7 @@ struct CompareView: View {
                     }
                     .frame(width: Self.valueWidth, alignment: .leading)
                 }
-                Text("")
+                Text(verbatim: "")
             }
             .font(.headline)
             Divider()
@@ -118,7 +118,7 @@ struct CompareView: View {
                     HStack(spacing: 4) {
                         Text(row.key).font(.system(.body, design: .monospaced))
                         if row.isSecret {
-                            Image(systemName: "lock.fill").foregroundStyle(.secondary).help("Gizli değer, Keychain'de durur")
+                            Image(systemName: "lock.fill").foregroundStyle(.secondary).help("Secret value. The Keychain keeps it.")
                         }
                     }
                     .frame(minWidth: 180, alignment: .leading)
@@ -147,17 +147,17 @@ struct CompareView: View {
                     Image(systemName: revealedKeys.contains(row.key) ? "eye.slash" : "eye")
                 }
                 .buttonStyle(.borderless)
-                .help(revealedKeys.contains(row.key) ? "Değerleri gizle" : "Değerleri göster")
+                .help(revealedKeys.contains(row.key) ? "Hide the values" : "Show the values")
             }
             if row.status == .missing {
-                Menu("Eksiklere kopyala") {
+                Menu("Copy to Missing") {
                     ForEach(project.environments.filter { row.values[$0.id] != nil }) { source in
-                        Button("\(source.name) değerini kopyala") { fillMissing(row, from: source.id, in: project) }
+                        Button("Copy the \(source.name) Value") { fillMissing(row, from: source.id, in: project) }
                     }
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
-                .help("Bu anahtarı, olmadığı ortamlara seçilen ortamın değeriyle ekler")
+                .help("Adds this key to the environments that do not have it, with the value of the selected environment")
             }
         }
     }
@@ -199,8 +199,8 @@ struct CompareView: View {
             state.replace(result.project)
             if !result.skipped.isEmpty {
                 Alerts.showInfo(
-                    title: "\(result.filled.count) anahtar eklendi, \(result.skipped.count) anahtar atlandı",
-                    message: "\(sourceName ?? "") ortamında bu anahtarlar yok: \(result.skipped.joined(separator: ", "))"
+                    title: String(localized: "Keys added: \(result.filled.count). Keys skipped: \(result.skipped.count)."),
+                    message: String(localized: "The \(sourceName ?? "") environment does not have these keys: \(result.skipped.joined(separator: ", "))")
                 )
             }
         } catch {
@@ -215,11 +215,11 @@ private struct StatusIcon: View {
     var body: some View {
         switch status {
         case .same:
-            Image(systemName: "equal.circle").foregroundStyle(.secondary).help("Tüm ortamlarda aynı")
+            Image(systemName: "equal.circle").foregroundStyle(.secondary).help("Same in all environments")
         case .different:
-            Image(systemName: "arrow.left.arrow.right.circle.fill").foregroundStyle(.orange).help("Ortamlarda farklı değerler var")
+            Image(systemName: "arrow.left.arrow.right.circle.fill").foregroundStyle(.orange).help("The environments have different values")
         case .missing:
-            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(.red).help("Bir veya daha fazla ortamda eksik")
+            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(.red).help("Missing in one or more environments")
         }
     }
 }
@@ -240,9 +240,9 @@ private struct CompareCell: View {
     var body: some View {
         Group {
             if isSecret && !isRevealed {
-                SecureField(isMissing ? "eksik" : "", text: $draft)
+                SecureField(isMissing ? String(localized: "missing") : String(), text: $draft)
             } else {
-                TextField(isMissing ? "eksik" : "boş", text: $draft)
+                TextField(isMissing ? "missing" : "empty", text: $draft)
             }
         }
         .textFieldStyle(.roundedBorder)

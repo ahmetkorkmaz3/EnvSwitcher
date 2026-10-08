@@ -31,9 +31,9 @@ struct ManagerWindow: View {
             }
         case nil:
             ContentUnavailableView(
-                "Bir dosya seçin",
+                "Choose a File",
                 systemImage: "doc.text",
-                description: Text("Soldaki listeden bir proje veya .env dosyası seçin.")
+                description: Text("Choose a project or a .env file in the list on the left.")
             )
         }
     }

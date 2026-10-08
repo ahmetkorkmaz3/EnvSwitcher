@@ -59,7 +59,7 @@ struct TargetDetailView: View {
             }
         }
         .navigationTitle(currentTarget.relativePath)
-        .navigationSubtitle("\(currentProject.name) · diskte: \(state.environmentName(currentTarget.activeEnvironmentId, in: currentProject))")
+        .navigationSubtitle("\(currentProject.name) · on disk: \(state.environmentName(currentTarget.activeEnvironmentId, in: currentProject))")
         .toolbar { toolbar }
         .task(id: ReloadKey(targetId: target.id, environmentId: environmentId)) { reload() }
         // A write can follow "Mevcut ortama kaydet", which changes the stored values too.
@@ -74,21 +74,21 @@ struct TargetDetailView: View {
     @ViewBuilder
     private var editor: some View {
         Table(rows, selection: $selectedKeys) {
-            TableColumn("Anahtar") { row in
+            TableColumn("Key") { row in
                 KeyField(key: row.key) { rename(row.key, to: $0) }
             }
-            TableColumn("Değer") { row in
+            TableColumn("Value") { row in
                 ValueField(
                     row: row,
                     onChange: { setValue($0, for: row.key) },
                     onReveal: { toggleReveal(row.key) }
                 )
             }
-            TableColumn("Gizli") { row in
-                Toggle("", isOn: Binding(get: { row.isSecret }, set: { setSecret($0, for: row.key) }))
+            TableColumn("Secret") { row in
+                Toggle(String(), isOn: Binding(get: { row.isSecret }, set: { setSecret($0, for: row.key) }))
                     .labelsHidden()
                     .toggleStyle(.checkbox)
-                    .help("Değeri Keychain'de sakla")
+                    .help("Keep the value in the Keychain")
             }
             .width(44)
         }
@@ -99,15 +99,15 @@ struct TargetDetailView: View {
 
     private var header: some View {
         HStack {
-            Picker("Görünüm", selection: $mode) {
-                Label("Düzenle", systemImage: "square.and.pencil").tag(DetailMode.edit)
-                Label("Karşılaştır", systemImage: "rectangle.split.3x1").tag(DetailMode.compare)
+            Picker("View", selection: $mode) {
+                Label("Edit", systemImage: "square.and.pencil").tag(DetailMode.edit)
+                Label("Compare", systemImage: "rectangle.split.3x1").tag(DetailMode.compare)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
             .fixedSize()
             if mode == .edit {
-                Picker("Düzenlenen ortam", selection: Binding(get: { environmentId }, set: { editingEnvironmentId = $0 })) {
+                Picker("Environment to Edit", selection: Binding(get: { environmentId }, set: { editingEnvironmentId = $0 })) {
                     ForEach(currentProject.environments) { environment in
                         Text(environment.isProtected ? "\(environment.name) 🔒" : environment.name).tag(environment.id)
                     }
@@ -125,18 +125,18 @@ struct TargetDetailView: View {
     @ViewBuilder
     private var status: some View {
         if !isOnDisk {
-            Label("Diskte \(state.environmentName(currentTarget.activeEnvironmentId, in: currentProject)) var. Bu değerler, bu ortama geçince yazılır.", systemImage: "info.circle")
+            Label("The disk has \(state.environmentName(currentTarget.activeEnvironmentId, in: currentProject)). The app writes these values when you switch to this environment.", systemImage: "info.circle")
                 .font(.callout)
                 .foregroundStyle(.secondary)
         } else if hasUnwrittenChanges {
             HStack {
-                Label("Değişiklikler diske yazılmadı.", systemImage: "exclamationmark.circle.fill")
+                Label("The changes are not on disk yet.", systemImage: "exclamationmark.circle.fill")
                     .font(.callout)
                     .foregroundStyle(.orange)
-                Button("Diske yaz") { switchHere() }
+                Button("Write to Disk") { switchHere() }
             }
         } else {
-            Label("Diskteki dosya güncel.", systemImage: "checkmark.circle.fill")
+            Label("The file on disk is up to date.", systemImage: "checkmark.circle.fill")
                 .font(.callout)
                 .foregroundStyle(.secondary)
         }
@@ -155,36 +155,36 @@ struct TargetDetailView: View {
     private var toolbar: some ToolbarContent {
         ToolbarItemGroup {
             Button { FolderOpener.reveal(currentProject.url(for: currentTarget)) } label: {
-                Label("Finder'da göster", systemImage: "folder")
+                Label("Show in Finder", systemImage: "folder")
             }
             Button { showPreview = true } label: {
-                Label(".env önizle", systemImage: "eye")
+                Label("Preview .env", systemImage: "eye")
             }
             Button { switchHere() } label: {
                 if isOnDisk {
-                    Label("Diske yaz", systemImage: "square.and.arrow.down")
+                    Label("Write to Disk", systemImage: "square.and.arrow.down")
                 } else {
-                    Label("Bu ortama geç", systemImage: "arrow.triangle.2.circlepath")
+                    Label("Switch to This Environment", systemImage: "arrow.triangle.2.circlepath")
                 }
             }
-            .help(isOnDisk ? "Bu ortamın değerlerini dosyaya yeniden yazar" : "Yalnızca bu dosyayı seçili ortama geçirir")
+            .help(isOnDisk ? "Writes the values of this environment to the file again" : "Switches only this file to the selected environment")
         }
     }
 
     private var bottomBar: some View {
         HStack(spacing: 8) {
             Button { addRow() } label: { Image(systemName: "plus") }
-                .help("Anahtar ekle")
+                .help("Add a key")
             Button { removeSelected() } label: { Image(systemName: "minus") }
                 .disabled(selectedKeys.isEmpty)
-                .help("Seçili anahtarları sil")
+                .help("Delete the selected keys")
             Spacer()
             missingHint
             Button { pasteFromClipboard() } label: {
-                Label("Panodan yapıştır", systemImage: "doc.on.clipboard")
+                Label("Paste from Clipboard", systemImage: "doc.on.clipboard")
             }
-            .help("Panodaki KEY=değer satırlarını bu ortama ekler")
-            Menu("Diğer ortamdan kopyala") {
+            .help("Adds the KEY=value lines on the clipboard to this environment")
+            Menu("Copy from Another Environment") {
                 ForEach(currentProject.environments.filter { $0.id != environmentId }) { environment in
                     Button(environment.name) { copy(from: environment.id) }
                 }
@@ -204,7 +204,7 @@ struct TargetDetailView: View {
                 compareFilter = .missing
                 mode = .compare
             } label: {
-                Label("\(missing.count) anahtar bu ortamda eksik", systemImage: "exclamationmark.circle.fill")
+                Label("Keys missing in this environment: \(missing.count)", systemImage: "exclamationmark.circle.fill")
                     .foregroundStyle(.red)
             }
             .help(missing.joined(separator: ", "))
@@ -216,7 +216,7 @@ struct TargetDetailView: View {
         let pairs = rows.map { DotEnvPair(key: $0.key, value: $0.isSecret ? "••••••••" : $0.value) }
         let text = DotEnvSerializer.serialize(pairs, headerLines: SwitchPlanner.header(project: currentProject, environment: environment))
         return VStack(alignment: .leading, spacing: 12) {
-            Text("\(currentTarget.relativePath) · \(environment.name)").font(.headline)
+            Text(verbatim: "\(currentTarget.relativePath) · \(environment.name)").font(.headline)
             ScrollView {
                 Text(text)
                     .font(.system(.body, design: .monospaced))
@@ -225,7 +225,7 @@ struct TargetDetailView: View {
             }
             HStack {
                 Spacer()
-                Button("Kapat") { showPreview = false }.keyboardShortcut(.defaultAction)
+                Button("Close") { showPreview = false }.keyboardShortcut(.defaultAction)
             }
         }
         .padding(20)
@@ -299,7 +299,7 @@ struct TargetDetailView: View {
         let text = NSPasteboard.general.string(forType: .string) ?? ""
         let parsed = DotEnvParser.parse(text)
         guard !parsed.pairs.isEmpty else {
-            Alerts.showInfo(title: "Panoda değer yok", message: "Panoya KEY=değer biçiminde satırlar kopyalayın.")
+            Alerts.showInfo(title: String(localized: "No Values on the Clipboard"), message: String(localized: "Copy lines in the KEY=value format to the clipboard."))
             return
         }
         let project = currentProject
@@ -311,7 +311,7 @@ struct TargetDetailView: View {
             return
         }
         guard plan.unchanged.count < parsed.pairs.count else {
-            Alerts.showInfo(title: "Değişiklik yok", message: "Panodaki değerler bu ortamda zaten aynı.")
+            Alerts.showInfo(title: String(localized: "No Changes"), message: String(localized: "The values on the clipboard are already the same in this environment."))
             return
         }
         var mode = EntryEditor.CopyMode.overwrite
@@ -341,7 +341,7 @@ private struct KeyField: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        TextField("ANAHTAR", text: $draft)
+        TextField("KEY", text: $draft)
             .focused($isFocused)
             .onSubmit {
                 if draft != key { onCommit(draft) }
@@ -369,16 +369,16 @@ private struct ValueField: View {
     var body: some View {
         HStack(spacing: 4) {
             if row.isSecret && !row.isRevealed {
-                SecureField("", text: $draft)
+                SecureField(String(), text: $draft)
             } else {
-                TextField("", text: $draft)
+                TextField(String(), text: $draft)
             }
             if row.isSecret {
                 Button(action: onReveal) {
                     Image(systemName: row.isRevealed ? "eye.slash" : "eye")
                 }
                 .buttonStyle(.borderless)
-                .help(row.isRevealed ? "Değeri gizle" : "Değeri göster")
+                .help(row.isRevealed ? "Hide the value" : "Show the value")
             }
         }
         .onAppear { draft = row.value }

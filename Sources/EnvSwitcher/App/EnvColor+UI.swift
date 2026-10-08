@@ -18,12 +18,12 @@ extension EnvColor {
 
     var title: String {
         switch self {
-        case .green: "Yeşil"
-        case .orange: "Turuncu"
-        case .red: "Kırmızı"
-        case .blue: "Mavi"
-        case .purple: "Mor"
-        case .gray: "Gri"
+        case .green: String(localized: "Green")
+        case .orange: String(localized: "Orange")
+        case .red: String(localized: "Red")
+        case .blue: String(localized: "Blue")
+        case .purple: String(localized: "Purple")
+        case .gray: String(localized: "Gray")
         }
     }
 }
