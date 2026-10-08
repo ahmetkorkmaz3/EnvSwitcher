@@ -10,6 +10,10 @@ public protocol SecretStore: Sendable {
 public enum SecretStoreError: Error, Equatable {
     case keychain(status: Int32)
     case simulatedFailure
+    /// The vault item exists but does not hold valid JSON. The item is left unchanged.
+    case vaultCorrupt
+    /// A Keychain item from before version 0.2.0 could not be read, so the vault did not open.
+    case migrationFailed(status: Int32)
 }
 
 public enum SecretAccount {
