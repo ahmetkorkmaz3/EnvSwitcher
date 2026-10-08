@@ -38,6 +38,10 @@ EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren 
 - Anahtar adını değiştirdikten sonra Return tuşuna basın veya başka bir alana geçin.
 - Diskteki ortamı düzenlerseniz "Değişiklikler diske yazılmadı" uyarısı çıkar. **Diske yaz** düğmesine basın.
 - **.env önizle** düğmesi, yazılacak dosyayı gösterir. Gizli değerler `••••••••` olarak görünür.
+- **Panodan yapıştır** düğmesi, panodaki `KEY=değer` satırlarını seçili ortama ekler.
+  - Ortamda olmayan anahtarlar eklenir. Boş değerler doldurulur. Soru sorulmaz.
+  - Bir anahtarın başka bir değeri varsa uygulama sorar: **Üzerine yaz** veya **Yalnızca eksikleri ekle**.
+  - Yeni bir anahtar gizli değere benziyorsa (`_KEY`, `TOKEN`, `SECRET` gibi) Keychain'e yazılır.
 
 **Ortamları karşılaştırma (Yönet… → dosya → Karşılaştır):**
 - Her anahtar bir satırda durur. Her ortamın değeri yan yana görünür.

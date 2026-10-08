@@ -13,6 +13,20 @@ public struct EntryEditor: Sendable {
         case skipExisting
     }
 
+    /// What a paste does to each key of the pasted text.
+    public struct PastePlan: Equatable, Sendable {
+        /// Keys that the environment does not have.
+        public var added: [String] = []
+        /// Keys that the environment has with an empty value.
+        public var filled: [String] = []
+        /// Keys that the environment has with a different, non-empty value.
+        public var conflicts: [String] = []
+        /// Keys that the environment has with the same value.
+        public var unchanged: [String] = []
+
+        public init() {}
+    }
+
     let secrets: any SecretStore
 
     public init(secrets: any SecretStore) {
@@ -132,6 +146,47 @@ public struct EntryEditor: Sendable {
                 }
             }
         }
+    }
+
+    public func planPaste(_ pairs: [DotEnvPair], in project: Project, targetId: UUID, environmentId: UUID) throws -> PastePlan {
+        guard let target = project.targets.first(where: { $0.id == targetId }) else { throw EditError.unknownTarget }
+        let existingKeys = Set(target.entries(for: environmentId).map(\.key))
+        var plan = PastePlan()
+        for pair in pairs {
+            guard existingKeys.contains(pair.key) else {
+                plan.added.append(pair.key)
+                continue
+            }
+            let current = try readValue(key: pair.key, in: project, targetId: targetId, environmentId: environmentId)
+            if current == pair.value {
+                plan.unchanged.append(pair.key)
+            } else if current.isEmpty {
+                plan.filled.append(pair.key)
+            } else {
+                plan.conflicts.append(pair.key)
+            }
+        }
+        return plan
+    }
+
+    /// Writes the pasted pairs to the environment. An empty existing value is always filled.
+    /// `.skipExisting` keeps the existing non-empty values. A new key that looks like a secret goes to the SecretStore.
+    public func pasteEntries(_ pairs: [DotEnvPair], mode: CopyMode, in project: Project, targetId: UUID, environmentId: UUID) throws -> Project {
+        if let invalid = pairs.first(where: { !DotEnvParser.isValidKey($0.key) }) { throw EditError.invalidKey(invalid.key) }
+        let plan = try planPaste(pairs, in: project, targetId: targetId, environmentId: environmentId)
+        let skipped = Set(plan.unchanged + (mode == .skipExisting ? plan.conflicts : []))
+        var updated = project
+        for pair in pairs where !skipped.contains(pair.key) {
+            updated = try upsertValue(
+                pair.value,
+                key: pair.key,
+                isSecret: SecretSuggester.isLikelySecret(pair.key),
+                in: updated,
+                targetId: targetId,
+                environmentId: environmentId
+            )
+        }
+        return updated
     }
 
     private func account(_ project: Project, _ targetId: UUID, _ environmentId: UUID, _ key: String) -> String {

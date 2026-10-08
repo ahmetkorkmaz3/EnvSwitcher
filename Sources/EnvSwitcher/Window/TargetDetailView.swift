@@ -180,6 +180,10 @@ struct TargetDetailView: View {
                 .help("Seçili anahtarları sil")
             Spacer()
             missingHint
+            Button { pasteFromClipboard() } label: {
+                Label("Panodan yapıştır", systemImage: "doc.on.clipboard")
+            }
+            .help("Panodaki KEY=değer satırlarını bu ortama ekler")
             Menu("Diğer ortamdan kopyala") {
                 ForEach(currentProject.environments.filter { $0.id != environmentId }) { environment in
                     Button(environment.name) { copy(from: environment.id) }
@@ -288,6 +292,37 @@ struct TargetDetailView: View {
             return project
         }
         reload()
+    }
+
+    /// Adds the KEY=value lines on the clipboard. Asks only when a key already has a different, non-empty value.
+    private func pasteFromClipboard() {
+        let text = NSPasteboard.general.string(forType: .string) ?? ""
+        let parsed = DotEnvParser.parse(text)
+        guard !parsed.pairs.isEmpty else {
+            Alerts.showInfo(title: "Panoda değer yok", message: "Panoya KEY=değer biçiminde satırlar kopyalayın.")
+            return
+        }
+        let project = currentProject
+        let plan: EntryEditor.PastePlan
+        do {
+            plan = try state.entryEditor.planPaste(parsed.pairs, in: project, targetId: target.id, environmentId: environmentId)
+        } catch {
+            state.report(error)
+            return
+        }
+        guard plan.unchanged.count < parsed.pairs.count else {
+            Alerts.showInfo(title: "Değişiklik yok", message: "Panodaki değerler bu ortamda zaten aynı.")
+            return
+        }
+        var mode = EntryEditor.CopyMode.overwrite
+        if !plan.conflicts.isEmpty {
+            let name = project.environment(id: environmentId)?.name ?? ""
+            guard let chosen = Alerts.choosePasteMode(environmentName: name, plan: plan) else { return }
+            mode = chosen
+        }
+        state.apply { try state.entryEditor.pasteEntries(parsed.pairs, mode: mode, in: project, targetId: target.id, environmentId: environmentId) }
+        reload()
+        Alerts.showImportWarnings(parsed.warnings.isEmpty ? [:] : ["Pano": parsed.warnings])
     }
 
     private func copy(from source: UUID) {

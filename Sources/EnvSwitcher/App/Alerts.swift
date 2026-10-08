@@ -92,4 +92,23 @@ enum Alerts {
         default: return nil
         }
     }
+
+    /// Asks what to do when pasted keys already have other values. Returns nil when the user cancels.
+    static func choosePasteMode(environmentName: String, plan: EntryEditor.PastePlan) -> EntryEditor.CopyMode? {
+        NSApp.activate()
+        let alert = NSAlert()
+        alert.messageText = "\(plan.conflicts.count) anahtarın \(environmentName) ortamında başka bir değeri var."
+        var lines = ["Değeri değişecek anahtarlar: \(plan.conflicts.joined(separator: ", "))"]
+        if !plan.added.isEmpty { lines.append("Eklenecek anahtarlar: \(plan.added.joined(separator: ", "))") }
+        if !plan.filled.isEmpty { lines.append("Boş değeri doldurulacak anahtarlar: \(plan.filled.joined(separator: ", "))") }
+        alert.informativeText = lines.joined(separator: "\n\n")
+        alert.addButton(withTitle: "Üzerine yaz")
+        alert.addButton(withTitle: "Yalnızca eksikleri ekle")
+        alert.addButton(withTitle: "Vazgeç")
+        switch alert.runModal() {
+        case .alertFirstButtonReturn: return .overwrite
+        case .alertSecondButtonReturn: return .skipExisting
+        default: return nil
+        }
+    }
 }

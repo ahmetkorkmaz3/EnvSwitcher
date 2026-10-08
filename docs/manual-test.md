@@ -78,7 +78,17 @@ scripts/bundle.sh && open build/EnvSwitcher.app
 6. **Düzenle** görünümüne dönün ve eksik anahtarı olan bir ortam seçin.
    - Beklenen: alt çubukta "N anahtar bu ortamda eksik" düğmesi çıkar. Düğme Karşılaştır görünümünü Eksik filtresiyle açar.
 
-## 7. Arayüz
+## 7. Panodan yapıştırma
+
+1. `apps/cart/.env.local` dosyasında boş bir ortam seçin. Panoya `A=1`, `B=2` ve `API_TOKEN=x` satırlarını kopyalayın. **Panodan yapıştır** düğmesine basın.
+   - Beklenen: soru çıkmaz. Üç anahtar eklenir. `API_TOKEN` gizli olarak işaretlenir.
+2. Panoya `A=9` ve `C=3` satırlarını kopyalayın ve yeniden yapıştırın.
+   - Beklenen: "1 anahtarın ... ortamında başka bir değeri var" sorusu çıkar.
+   - **Yalnızca eksikleri ekle** seçin. Beklenen: `A` değeri `1` kalır. `C=3` eklenir.
+3. 2. adımı tekrarlayın ve **Üzerine yaz** seçin. Beklenen: `A` değeri `9` olur.
+4. Panoya `KEY=değer` satırı olmayan bir metin kopyalayıp yapıştırın. Beklenen: "Panoda değer yok" uyarısı çıkar.
+
+## 8. Arayüz
 
 1. Sistem ayarlarından koyu moda geçin. Beklenen: pencere, menü ve sheet okunur kalır.
 2. Menüdeki ortam noktaları ortam renklerini gösterir.

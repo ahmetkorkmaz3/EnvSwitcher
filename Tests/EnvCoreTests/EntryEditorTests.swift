@@ -114,4 +114,56 @@ struct EntryEditorTests {
             try editor.upsertValue("v", key: "1X", isSecret: false, in: f.project, targetId: f.cart.id, environmentId: f.local)
         }
     }
+
+    @Test func planPasteSortsKeysByWhatChanges() throws {
+        var (f, editor) = try setUp()
+        f.setEntries([EnvEntry(key: "A", value: "1"), EnvEntry(key: "EMPTY", value: ""), EnvEntry(key: "SAME", value: "s")], target: f.cart, env: f.test)
+        let pairs = [
+            DotEnvPair(key: "A", value: "2"),
+            DotEnvPair(key: "EMPTY", value: "e"),
+            DotEnvPair(key: "SAME", value: "s"),
+            DotEnvPair(key: "NEW", value: "n"),
+        ]
+        let plan = try editor.planPaste(pairs, in: f.project, targetId: f.cart.id, environmentId: f.test)
+        #expect(plan.added == ["NEW"])
+        #expect(plan.filled == ["EMPTY"])
+        #expect(plan.conflicts == ["A"])
+        #expect(plan.unchanged == ["SAME"])
+    }
+
+    @Test func planPasteReadsSecretValues() throws {
+        let (f, editor) = try setUp()
+        let plan = try editor.planPaste([DotEnvPair(key: "TOKEN", value: "t0")], in: f.project, targetId: f.cart.id, environmentId: f.local)
+        #expect(plan.unchanged == ["TOKEN"])
+    }
+
+    @Test func pasteSkipExistingFillsEmptyAndAddsMissingOnly() throws {
+        var (f, editor) = try setUp()
+        f.setEntries([EnvEntry(key: "A", value: "1"), EnvEntry(key: "EMPTY", value: "")], target: f.cart, env: f.test)
+        let pairs = [
+            DotEnvPair(key: "A", value: "2"),
+            DotEnvPair(key: "EMPTY", value: "e"),
+            DotEnvPair(key: "NEW", value: "n"),
+            DotEnvPair(key: "API_TOKEN", value: "secret"),
+        ]
+        let p = try editor.pasteEntries(pairs, mode: .skipExisting, in: f.project, targetId: f.cart.id, environmentId: f.test)
+        #expect(p.targets[0].entries(for: f.test) == [
+            EnvEntry(key: "A", value: "1"),
+            EnvEntry(key: "EMPTY", value: "e"),
+            EnvEntry(key: "NEW", value: "n"),
+            EnvEntry(key: "API_TOKEN", value: nil, isSecret: true),
+        ])
+        #expect(try f.secrets.read(account: f.account(f.cart, f.test, "API_TOKEN")) == "secret")
+    }
+
+    @Test func pasteOverwriteChangesExistingValuesAndKeepsSecretFlag() throws {
+        let (f, editor) = try setUp()
+        let pairs = [DotEnvPair(key: "A", value: "2"), DotEnvPair(key: "TOKEN", value: "t1")]
+        let p = try editor.pasteEntries(pairs, mode: .overwrite, in: f.project, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local) == [
+            EnvEntry(key: "A", value: "2"),
+            EnvEntry(key: "TOKEN", value: nil, isSecret: true),
+        ])
+        #expect(try f.secrets.read(account: f.account(f.cart, f.local, "TOKEN")) == "t1")
+    }
 }
