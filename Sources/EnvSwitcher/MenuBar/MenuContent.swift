@@ -11,22 +11,22 @@ struct MenuContent: View {
         if !state.store.projects.isEmpty {
             Divider()
         }
-        Button("Proje Ekle…") {
+        Button("Add Project…") {
             state.showAddProject = true
             openManager()
         }
         .keyboardShortcut("n")
-        Button("Yönet…") { openManager() }
+        Button("Manage…") { openManager() }
             .keyboardShortcut("m")
-        SettingsLink { Text("Ayarlar…") }
+        SettingsLink { Text("Settings…") }
             .keyboardShortcut(",")
         Divider()
         if let update = state.updates.available {
-            Button("Güncelleme var: \(update.version)") { state.updates.installAvailableUpdate() }
+            Button("Update Available: \(update.version.description)") { state.updates.installAvailableUpdate() }
         }
-        Button("Çık") { NSApp.terminate(nil) }
+        Button("Quit") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
-        Text("Sürüm \(state.updates.versionText)")
+        Text("Version \(state.updates.versionText)")
     }
 
     private func openManager() {

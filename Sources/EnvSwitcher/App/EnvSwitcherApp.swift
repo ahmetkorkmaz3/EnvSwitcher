@@ -20,7 +20,7 @@ struct EnvSwitcherApp: App {
         }
         .defaultSize(width: 920, height: 580)
 
-        Window("Değişiklikler", id: WindowID.drift) {
+        Window("Changes", id: WindowID.drift) {
             DriftView()
                 .environment(state)
         }

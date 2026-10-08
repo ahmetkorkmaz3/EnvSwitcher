@@ -7,7 +7,7 @@ import Observation
 @Observable
 final class UpdateMonitor {
     private(set) var available: AvailableUpdate?
-    /// CFBundleShortVersionString, for the "Sürüm" menu line.
+    /// CFBundleShortVersionString, for the "Version" menu line.
     let versionText: String
 
     @ObservationIgnored private let current: SemanticVersion?
@@ -43,7 +43,7 @@ final class UpdateMonitor {
         NSWorkspace.shared.open(available.url)
         Alerts.showInfo(
             title: "EnvSwitcher \(available.version)",
-            message: "Kurulum komutu panoya kopyalandı. Terminale yapıştırın."
+            message: String(localized: "The app copied the install command to the clipboard. Paste it into Terminal.")
         )
     }
 

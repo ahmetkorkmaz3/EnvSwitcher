@@ -91,7 +91,7 @@ final class AppState {
             let result = try repository.load()
             store = result.store
             if let notice = result.notice {
-                DispatchQueue.main.async { Alerts.showInfo(title: "Depo geri yüklendi", message: Self.describe(notice)) }
+                DispatchQueue.main.async { Alerts.showInfo(title: String(localized: "Data Restored"), message: Self.describe(notice)) }
             }
         } catch {
             loadFailed = true
@@ -115,7 +115,7 @@ final class AppState {
         guard !loadFailed else {
             if !reportedSaveBlocked {
                 reportedSaveBlocked = true
-                Alerts.showError("Depo okunamadı, bu nedenle değişiklikler kaydedilmiyor. Uygulamayı kapatıp yeniden açın.")
+                Alerts.showError(String(localized: "The app cannot read its data, so it does not save changes. Quit the app and open it again."))
             }
             return
         }
@@ -174,7 +174,7 @@ final class AppState {
     func stateText(_ project: Project) -> String {
         switch project.displayState {
         case .none: "—"
-        case .mixed: "karışık"
+        case .mixed: String(localized: "mixed")
         case .single(let id): environmentName(id, in: project)
         }
     }
@@ -226,7 +226,7 @@ final class AppState {
         do {
             let preflight = try planner.preflight(project: project, scope: scope, environmentId: environmentId)
             if !preflight.missingDirectories.isEmpty {
-                // Spec 8: the error names the files and offers "Dosyayı projeden çıkar".
+                // Spec 8: the error names the files and offers "Remove from Project".
                 if Alerts.offerRemoveMissing(message(for: SwitchError.directoryMissing(preflight.missingDirectories))) {
                     let missing = Set(preflight.missingDirectories)
                     apply {
@@ -284,7 +284,10 @@ final class AppState {
                     drifted: fresh.drifted,
                     observed: fresh.observed
                 )
-                Alerts.showInfo(title: "Dosyalar değişti", message: "Pencere açıkken bir veya daha fazla dosya değişti. Değişiklikleri yeniden gözden geçirin.")
+                Alerts.showInfo(
+                    title: String(localized: "Files Changed"),
+                    message: String(localized: "One or more files changed while the window was open. Review the changes again.")
+                )
                 return false
             }
         } catch {
@@ -296,7 +299,7 @@ final class AppState {
 
         if case .saveToCurrent(let environmentIdByTarget) = choice {
             if let unchosen = pending.drifted.first(where: { environmentIdByTarget[$0.targetId] == nil }) {
-                Alerts.showError("\(unchosen.relativePath) için bir ortam seçilmedi. Hiçbir dosya yazılmadı.")
+                Alerts.showError(String(localized: "No environment is selected for \(unchosen.relativePath). The app wrote no files."))
                 return true
             }
             do {
@@ -339,33 +342,33 @@ final class AppState {
     func message(for error: Error) -> String {
         switch error {
         case SwitchError.directoryMissing(let paths):
-            return "Şu dosyaların klasörü yok: \(paths.joined(separator: ", ")). Dosyalar değişmedi."
+            return String(localized: "These files have no folder: \(paths.joined(separator: ", ")). The files did not change.")
         case SwitchError.writeFailed(let path, let reason):
-            return "\(path) dosyası yazılamadı. Tüm dosyalar eski içeriğe döndü.\n\(reason)"
+            return String(localized: "The app could not write \(path). All files went back to their old contents.\n\(reason)")
         case SwitchError.rollbackFailed(let paths, let folder):
-            return "Şu dosyalar eski içeriğe dönemedi: \(paths.joined(separator: ", ")). Eski içerikler şu klasörde: \(folder.path)"
+            return String(localized: "These files could not go back to their old contents: \(paths.joined(separator: ", ")). The old contents are in this folder: \(folder.path)")
         case SwitchError.recoveryFailed(let paths):
-            return "Şu dosyalar eski içeriğe dönemedi ve eski içerikleri kaydedilemedi: \(paths.joined(separator: ", ")). Bu dosyaları elle kontrol edin."
+            return String(localized: "These files could not go back to their old contents, and the app could not save the old contents: \(paths.joined(separator: ", ")). Check these files by hand.")
         case SwitchError.fileChanged(let paths):
-            return "Şu dosyalar ortam değişirken değişti: \(paths.joined(separator: ", ")). Hiçbir dosya yazılmadı. Ortamı yeniden seçin."
+            return String(localized: "These files changed during the switch: \(paths.joined(separator: ", ")). The app wrote no files. Choose the environment again.")
         case SwitchError.secretMissing(let path, let key):
-            return "\(path) dosyasındaki \(key) gizli değeri Keychain'de bulunamadı. Dosyalar değişmedi. Değeri düzenleme penceresinde yeniden girin."
+            return String(localized: "\(path): the Keychain has no secret value for \(key). The files did not change. Enter the value again in the edit window.")
         case SwitchError.unknownEnvironment, SwitchError.unknownTarget:
-            return "Ortam veya dosya bulunamadı. Pencereyi kapatıp yeniden açın."
+            return String(localized: "The app cannot find the environment or the file. Close the window and open it again.")
         case SecretStoreError.keychain(let status):
-            return "Keychain erişimi başarısız oldu (kod \(status))."
+            return String(localized: "The app cannot use the Keychain (code \(status)).")
         case SecretStoreError.vaultCorrupt:
-            return "Keychain'deki EnvSwitcher kaydı bozuk. Gizli değerler okunamıyor. Uygulama bu kaydı değiştirmedi."
+            return String(localized: "The EnvSwitcher item in the Keychain is damaged. The app cannot read the secret values. The app did not change this item.")
         case SecretStoreError.migrationFailed:
-            return "Keychain'deki gizli değerler taşınamadı. Uygulamayı yeniden açın ve izin verin."
+            return String(localized: "The app could not move the secret values in the Keychain. Open the app again and give permission.")
         case EntryEditor.EditError.duplicateKey(let key):
-            return "\(key) anahtarı zaten var."
+            return String(localized: "The key \(key) already exists.")
         case EntryEditor.EditError.invalidKey(let key):
-            return "\"\(key)\" geçerli bir anahtar adı değil. Ad bir harf veya _ ile başlamalı."
+            return String(localized: "\"\(key)\" is not a valid key name. The name must start with a letter or _.")
         case ProjectEditor.EditError.lastEnvironment:
-            return "Bir projede en az bir ortam olmalı."
+            return String(localized: "A project must have at least one environment.")
         case ProjectEditor.EditError.duplicateTarget(let path):
-            return "\(path) zaten projede var."
+            return String(localized: "\(path) is already in the project.")
         default:
             return error.localizedDescription
         }
@@ -374,9 +377,9 @@ final class AppState {
     static func describe(_ notice: StoreLoadNotice) -> String {
         switch notice {
         case .restoredFromBackup:
-            "store.json okunamadı. Uygulama son yedeği (store.json.bak) yükledi."
+            String(localized: "The app cannot read store.json. The app loaded the last backup (store.json.bak).")
         case .resetAfterCorruption(let url):
-            "store.json ve yedeği okunamadı. Uygulama boş bir depo ile açıldı. Bozuk dosya: \(url.path)"
+            String(localized: "The app cannot read store.json or its backup. The app opened with empty data. Damaged file: \(url.path)")
         }
     }
 }

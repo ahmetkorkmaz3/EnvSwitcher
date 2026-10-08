@@ -9,7 +9,7 @@ enum Panels {
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
-        panel.prompt = "Seç"
+        panel.prompt = String(localized: "Choose")
         return panel.runModal() == .OK ? panel.url : nil
     }
 
@@ -21,7 +21,7 @@ enum Panels {
         panel.allowsMultipleSelection = false
         panel.allowedContentTypes = [.application]
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
-        panel.prompt = "Seç"
+        panel.prompt = String(localized: "Choose")
         return panel.runModal() == .OK ? panel.url : nil
     }
 }
