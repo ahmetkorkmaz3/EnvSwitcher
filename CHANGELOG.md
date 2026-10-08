@@ -4,6 +4,8 @@ This file uses the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) form
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-08
+
 ### Changed
 
 - The default protected environment is now `prod`, not `canli`. Existing projects keep their environment names.
