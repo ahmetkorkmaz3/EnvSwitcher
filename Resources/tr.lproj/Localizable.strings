@@ -1,2 +1,11 @@
 /* Settings */
 "Language" = "Dil";
+"System" = "Sistem";
+"Restart Now" = "Şimdi Yeniden Başlat";
+"EnvSwitcher uses the new language after a restart." = "EnvSwitcher yeni dili yeniden başladıktan sonra kullanır.";
+"EnvSwitcher could not restart. Quit the app and open it again.\n%@" = "EnvSwitcher yeniden başlatılamadı. Uygulamayı kapatıp yeniden açın.\n%@";
+"Editor" = "Editör";
+"The app that opens .env files" = ".env dosyalarını açan uygulama";
+"Choose…" = "Seç…";
+"Reset" = "Sıfırla";
+"Terminal" = "Terminal";

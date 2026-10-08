@@ -1,2 +1,11 @@
 /* Settings */
 "Language" = "Language";
+"System" = "System";
+"Restart Now" = "Restart Now";
+"EnvSwitcher uses the new language after a restart." = "EnvSwitcher uses the new language after a restart.";
+"EnvSwitcher could not restart. Quit the app and open it again.\n%@" = "EnvSwitcher could not restart. Quit the app and open it again.\n%@";
+"Editor" = "Editor";
+"The app that opens .env files" = "The app that opens .env files";
+"Choose…" = "Choose…";
+"Reset" = "Reset";
+"Terminal" = "Terminal";
