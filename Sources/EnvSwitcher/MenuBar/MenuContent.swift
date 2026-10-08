@@ -21,8 +21,12 @@ struct MenuContent: View {
         SettingsLink { Text("Ayarlar…") }
             .keyboardShortcut(",")
         Divider()
+        if let update = state.updates.available {
+            Button("Güncelleme var: \(update.version)") { state.updates.installAvailableUpdate() }
+        }
         Button("Çık") { NSApp.terminate(nil) }
             .keyboardShortcut("q")
+        Text("Sürüm \(state.updates.versionText)")
     }
 
     private func openManager() {

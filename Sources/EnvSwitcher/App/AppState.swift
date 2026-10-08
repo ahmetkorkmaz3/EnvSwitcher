@@ -51,6 +51,7 @@ final class AppState {
     let repository: StoreRepository
     let secrets: any SecretStore
     let files: any FileWriter
+    let updates = UpdateMonitor()
 
     init(
         repository: StoreRepository = StoreRepository(directory: StoreRepository.defaultDirectory),
@@ -62,6 +63,7 @@ final class AppState {
         self.files = files
         load()
         openVault()
+        updates.start()
         // Spec 6.1: check drift when the user opens the menu.
         NotificationCenter.default.addObserver(forName: NSMenu.didBeginTrackingNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.refreshDrift() }
