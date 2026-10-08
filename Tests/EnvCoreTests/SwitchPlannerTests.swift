@@ -121,7 +121,7 @@ struct SwitchPlannerTests {
     @Test func preflightAsksConfirmationOnlyForProtectedEnvironment() throws {
         let f = try ProjectFixture()
         let planner = SwitchPlanner(secrets: f.secrets)
-        #expect(try planner.preflight(project: f.project, scope: .project, environmentId: f.canli).needsProtectedConfirmation)
+        #expect(try planner.preflight(project: f.project, scope: .project, environmentId: f.prod).needsProtectedConfirmation)
         #expect(try !planner.preflight(project: f.project, scope: .project, environmentId: f.test).needsProtectedConfirmation)
     }
 

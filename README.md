@@ -1,46 +1,46 @@
-<p align="center"><img src="site/icon.png" alt="EnvSwitcher ikonu" width="96" height="96"></p>
+<p align="center"><img src="site/icon.png" alt="EnvSwitcher icon" width="96" height="96"></p>
 
 <h1 align="center">EnvSwitcher</h1>
 
 <p align="center">
-  <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest"><img src="https://img.shields.io/github/v/release/ahmetkorkmaz3/EnvSwitcher" alt="Son sürüm"></a>
+  <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/latest"><img src="https://img.shields.io/github/v/release/ahmetkorkmaz3/EnvSwitcher" alt="Latest release"></a>
   <a href="https://github.com/ahmetkorkmaz3/EnvSwitcher/actions/workflows/ci.yml"><img src="https://github.com/ahmetkorkmaz3/EnvSwitcher/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/macOS-14%2B-blue" alt="macOS 14 ve üstü">
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/ahmetkorkmaz3/EnvSwitcher" alt="MIT lisansı"></a>
+  <img src="https://img.shields.io/badge/macOS-14%2B-blue" alt="macOS 14 or later">
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/ahmetkorkmaz3/EnvSwitcher" alt="MIT license"></a>
 </p>
 
-<p align="center"><a href="https://ahmetkorkmaz3.github.io/EnvSwitcher/">Tanıtım sayfası</a> · <a href="#kurulum">Kurulum</a> · <a href="#hızlı-başlangıç">Hızlı başlangıç</a> · <a href="CONTRIBUTING.md">Katkı</a></p>
+<p align="center"><a href="https://ahmetkorkmaz3.github.io/EnvSwitcher/">Website</a> · <a href="#install">Install</a> · <a href="#quick-start">Quick start</a> · <a href="CONTRIBUTING.md">Contributing</a></p>
 
-EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren bir macOS menü çubuğu uygulamasıdır. Örnek: `local`, `test` ve `canli` değerlerini tek tıkla değiştirin.
+EnvSwitcher is a macOS menu bar app that switches the `.env` files of a project between environments. Example: change between the `local`, `test`, and `prod` values with one click.
 
-- Değerleri uygulamada bir kez girin. Ortam değiştirince uygulama `.env` dosyalarını yeniden yazar.
-- Gizli değerler (token, şifre, anahtar) macOS Keychain içinde durur. `store.json` dosyasına girmez.
-- Bir monorepodaki tüm `.env` dosyaları birlikte veya tek tek değişir.
+- Enter the values in the app one time. When you change the environment, the app writes the `.env` files again.
+- Secret values (tokens, passwords, keys) stay in the macOS Keychain. They do not go into the `store.json` file.
+- All `.env` files of a monorepo change together or one at a time.
 
-## Kurulum
+## Install
 
-Terminalde şu komutu çalıştırın:
+Run this command in Terminal:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
 ```
 
-Komut son sürümü indirir, SHA-256 değerini kontrol eder, `/Applications` içine kurar ve uygulamayı açar. Gereksinim: macOS 14 veya üstü. Apple Silicon ve Intel desteklenir.
+The command downloads the latest release, checks the SHA-256 value, installs the app in `/Applications`, and opens it. Requirement: macOS 14 or later. The app supports Apple Silicon and Intel.
 
-**Güncelleme:** Aynı komutu yeniden çalıştırın. Yeni bir sürüm çıkınca menüde "Güncelleme var" satırı görünür. Bu satır komutu panoya kopyalar.
+**Update:** Run the same command again. When a new release is available, the menu shows an "Update Available" item. This item copies the command to the clipboard.
 
-**Belirli bir sürüm:** `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh`
+**A specific version:** `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh`
 
-**Elle kurulum:**
+**Manual install:**
 
-1. [Releases](https://github.com/ahmetkorkmaz3/EnvSwitcher/releases) sayfasından `EnvSwitcher-X.Y.Z.zip` dosyasını indirin.
-2. Zip dosyasını açın. `EnvSwitcher.app` dosyasını `/Applications` içine taşıyın.
-3. Uygulamayı açın. macOS "Apple doğrulayamadı" uyarısını gösterir. **Bitti** düğmesine basın.
-4. Sistem Ayarları → Gizlilik ve Güvenlik sayfasını açın. Sayfanın altında **Yine de Aç** düğmesine basın.
+1. Download the `EnvSwitcher-X.Y.Z.zip` file from the [Releases](https://github.com/ahmetkorkmaz3/EnvSwitcher/releases) page.
+2. Open the zip file. Move `EnvSwitcher.app` into `/Applications`.
+3. Open the app. macOS shows the "Apple could not verify" warning. Click **Done**.
+4. Open System Settings → Privacy & Security. At the bottom of the page, click **Open Anyway**.
 
-Uygulama notarize edilmedi, bu nedenle tarayıcıdan indirilen dosyada bu uyarı çıkar. Kurulum komutu bu uyarıyı göstermez.
+The app is not notarized, so a file from the browser shows this warning. The install command does not show this warning.
 
-**Kaldırma:**
+**Uninstall:**
 
 ```sh
 osascript -e 'quit app "EnvSwitcher"'
@@ -50,90 +50,90 @@ security delete-generic-password -s EnvSwitcher -a vault
 defaults delete com.ahmetkorkmaz.envswitcher
 ```
 
-Bu komutlar `.env` dosyalarınızı değiştirmez.
+These commands do not change your `.env` files.
 
-## Hızlı başlangıç
+## Quick start
 
-1. Uygulamayı kurun (bkz. [Kurulum](#kurulum)) ve açın. Menü çubuğunda `EnvSwitcher` yazısı görünür.
-2. Menüden **Proje Ekle…** seçin. Proje klasörünü seçin veya pencereye sürükleyin.
-3. Bulunan `.env` dosyalarını kontrol edin. **Ekle** düğmesine basın. Dosyaların mevcut içeriği `local` ortamına aktarılır.
-4. **Yönet…** penceresinde bir dosya seçin. Üstten **Karşılaştır** görünümünü seçin.
-5. Eksik anahtarlar için **Eksiklere kopyala → local değerini kopyala** seçin. Sonra `test` için farklı olan değerleri değiştirin.
-6. Menüden proje → **Tüm dosyalar → test** seçin. Tüm dosyalar `test` değerleriyle yazılır.
+1. Install the app (see [Install](#install)) and open it. The menu bar shows `EnvSwitcher`.
+2. In the menu, choose **Add Project…**. Choose the project folder or drag it into the window.
+3. Check the `.env` files that the app finds. Click **Add**. The app imports the current content of the files into the `local` environment.
+4. In the **Manage…** window, choose a file. At the top, choose the **Compare** view.
+5. For the missing keys, choose **Copy to Missing → Copy the local Value**. Then change the values that are different for `test`.
+6. In the menu, choose the project → **All Files → test**. The app writes all files with the `test` values.
 
-## Kavramlar
+## Concepts
 
-| Kavram | Anlamı |
+| Concept | Meaning |
 |---|---|
-| Proje | Bir kök klasör. Her klasör yalnızca bir projede olur. |
-| Ortam | Bir değer seti, örnek: `local`, `test`, `canli`. Her ortamın bir rengi vardır. |
-| Korumalı ortam | Bu ortama geçmeden önce uygulama onay ister. `canli` korumalı başlar. |
-| Hedef dosya | Uygulamanın yönettiği bir `.env` dosyası, örnek: `apps/cart/.env.local`. |
-| Diskteki ortam | Bir dosyaya en son yazılan ortam. Menüde ve kenar çubuğunda renkli nokta ile görünür. |
-| Gizli değer | Keychain'de saklanan değer. Adında `SECRET`, `PASSWORD`, `TOKEN`, `PRIVATE` olan veya `_KEY` ile biten anahtarlar otomatik gizli olur. `NEXT_PUBLIC_` ile başlayanlar gizli olmaz. |
+| Project | A root folder. Each folder is in one project only. |
+| Environment | A set of values, for example `local`, `test`, `prod`. Each environment has a color. |
+| Protected environment | The app asks for confirmation before it switches to this environment. `prod` starts as protected. |
+| Target file | A `.env` file that the app manages, for example `apps/cart/.env.local`. |
+| Environment on disk | The last environment that the app wrote to a file. The menu and the sidebar show it with a colored dot. |
+| Secret value | A value that the Keychain keeps. Keys with `SECRET`, `PASSWORD`, `TOKEN`, or `PRIVATE` in the name, or keys that end with `_KEY`, become secret automatically. Keys that start with `NEXT_PUBLIC_` do not become secret. |
 
-## Günlük kullanım
+## Daily use
 
-**Ortam değiştirme (menü çubuğu):**
-- **Tüm dosyalar** altındaki ortam, projedeki tüm dosyaları değiştirir.
-- **Dosyalar** altındaki bir dosyanın alt menüsü yalnızca o dosyayı değiştirir.
-- Dosyalar farklı ortamlarda ise başlık `karışık` gösterir.
+**Switch the environment (menu bar):**
+- An environment under **All Files** switches all files of the project.
+- The submenu of a file under **Files** switches only that file.
+- When the files are in different environments, the title shows `mixed`.
 
-**Değer düzenleme (Yönet… penceresi):**
-- Bir dosya seçin ve üstten ortamı seçin. Her değişiklik hemen kaydedilir.
-- Anahtar adını değiştirdikten sonra Return tuşuna basın veya başka bir alana geçin.
-- Diskteki ortamı düzenlerseniz "Değişiklikler diske yazılmadı" uyarısı çıkar. **Diske yaz** düğmesine basın.
-- **.env önizle** düğmesi, yazılacak dosyayı gösterir. Gizli değerler `••••••••` olarak görünür.
-- **Panodan yapıştır** düğmesi, panodaki `KEY=değer` satırlarını seçili ortama ekler.
-  - Ortamda olmayan anahtarlar eklenir. Boş değerler doldurulur. Soru sorulmaz.
-  - Bir anahtarın başka bir değeri varsa uygulama sorar: **Üzerine yaz** veya **Yalnızca eksikleri ekle**.
-  - Yeni bir anahtar gizli değere benziyorsa (`_KEY`, `TOKEN`, `SECRET` gibi) Keychain'e yazılır.
+**Edit values (Manage… window):**
+- Choose a file and choose the environment at the top. The app saves each change immediately.
+- After you change a key name, press Return or move to a different field.
+- When you edit the environment on disk, the window shows "The changes are not on disk yet." Click **Write to Disk**.
+- **Preview .env** shows the file that the app will write. Secret values show as `••••••••`.
+- **Paste from Clipboard** adds the `KEY=value` lines on the clipboard to the selected environment.
+  - The app adds the keys that are not in the environment. It fills the empty values. It asks no question.
+  - When a key has a different value, the app asks: **Overwrite** or **Add Only Missing Keys**.
+  - When a new key looks like a secret (`_KEY`, `TOKEN`, `SECRET`), the app writes it to the Keychain.
 
-**Ortamları karşılaştırma (Yönet… → dosya → Karşılaştır):**
-- Her anahtar bir satırda durur. Her ortamın değeri yan yana görünür.
-- Satırın başındaki işaret durumu gösterir: kırmızı = bir ortamda eksik, turuncu = değerler farklı, gri = tüm ortamlarda aynı.
-- **Eksik** ve **Farklı** filtreleri yalnızca ilgili satırları gösterir.
-- Eksik bir hücreye değer yazıp Return tuşuna basın. Anahtar o ortama eklenir.
-- **Eksiklere kopyala** bir ortamın değerini, anahtarın olmadığı tüm ortamlara yazar.
-- **Tüm eksiklere kopyala** aynı işi tüm eksik anahtarlar için tek seferde yapar. Önce onay ister. Var olan değerler değişmez.
-  - **Her anahtar için ilk dolu ortamdan**: her anahtarın değeri, anahtarın olduğu ilk ortamdan alınır.
-  - **<ortam> değerlerini kopyala**: değerler seçilen ortamdan alınır. Bu ortamda olmayan anahtarlar atlanır ve listelenir.
-- Gizli değerler `••••` olarak görünür. Satırdaki göz düğmesi değerleri gösterir.
-- Düzenle görünümünde bir ortamda eksik anahtar varsa, alt çubukta "N anahtar bu ortamda eksik" düğmesi çıkar.
+**Compare environments (Manage… → file → Compare):**
+- Each key has one row. The values of each environment show side by side.
+- The mark at the start of the row shows the status: red = missing in an environment, orange = the values are different, gray = the same in all environments.
+- The **Missing** and **Different** filters show only the related rows.
+- Type a value in a missing cell and press Return. The app adds the key to that environment.
+- **Copy to Missing** writes the value of one environment to all environments that do not have the key.
+- **Copy to All Missing** does the same for all missing keys in one step. It asks for confirmation first. Existing values do not change.
+  - **From the First Filled Environment of Each Key**: each key gets its value from the first environment that has the key.
+  - **Copy the <environment> Values**: the values come from the selected environment. The app skips the keys that this environment does not have and lists them.
+- Secret values show as `••••`. The eye button in the row shows the values.
+- When the Edit view has missing keys in an environment, the bottom bar shows a "Keys missing in this environment: N" button.
 
-**Proje ayarları (kenar çubuğunda proje adı):**
-- Ortam ekleyin, adını, rengini ve korumasını değiştirin.
-- **Dosya ekle** ile sonradan oluşan bir `.env` dosyasını ekleyin. İçeriği projenin diskteki ortamına aktarılır.
-- Projeyi silmek, diskteki `.env` dosyalarını değiştirmez.
+**Project settings (project name in the sidebar):**
+- Add environments. Change their name, color, and protection.
+- Use **Add File** to add a `.env` file that you create later. The app imports its content into the environment on disk of the project.
+- When you delete a project, the `.env` files on disk do not change.
 
-## Güvenlik önlemleri
+## Safety checks
 
-- **Elle değişiklik kontrolü:** Bir dosyayı editörde değiştirdiyseniz, ortam değişmeden önce uygulama farkı gösterir. Seçenekler: değişikliği bir ortama kaydet, at ve geç, iptal.
-- **Boş ortam uyarısı:** Seçilen ortamda bir dosya için değer yoksa uygulama sorar. Bu uyarı dosyaların yanlışlıkla boşalmasını önler.
-- **Ya hep ya hiç yazma:** Bir dosya yazılamazsa, yazılan dosyalar eski içeriğe döner.
-- **Dosya izinleri:** Uygulama dosyanın izinlerini (örnek `600`) korur ve sembolik bağlantının hedefine yazar.
-- **Git uyarısı:** Bir `.env` dosyası `.gitignore` içinde değilse, proje eklerken uyarı çıkar.
+- **Manual change check:** When you edit a file in an editor, the app shows the difference before the environment changes. Options: save the change to an environment, discard and switch, or cancel.
+- **Empty environment warning:** When the selected environment has no values for a file, the app asks first. This warning prevents empty files by mistake.
+- **All or nothing:** When the app cannot write one file, the files that it wrote go back to their old content.
+- **File permissions:** The app keeps the permissions of the file (for example `600`) and writes to the target of a symbolic link.
+- **Git warning:** When a `.env` file is not in `.gitignore`, the app shows a warning when you add the project.
 
-## Taramada atlanan klasörler
+## Folders that the scan skips
 
-`node_modules`, `vendor`, `.git`, `dist`, `build`, `.next`, `.turbo`, `.claude` ve kendi `.git` girdisi olan alt klasörler (ayrı repolar, worktree kopyaları). `.example`, `.sample` ve `.template` ile biten dosyalar listede görünür ama seçili gelmez.
+`node_modules`, `vendor`, `.git`, `dist`, `build`, `.next`, `.turbo`, `.claude`, and subfolders with their own `.git` entry (separate repositories, worktree copies). Files that end with `.example`, `.sample`, or `.template` show in the list, but the app does not select them.
 
-## Veri konumu
+## Data location
 
-| Ne | Nerede |
+| What | Where |
 |---|---|
-| Projeler, ortamlar, gizli olmayan değerler | `~/Library/Application Support/EnvSwitcher/store.json` |
-| Son yedek | `~/Library/Application Support/EnvSwitcher/store.json.bak` |
-| Gizli değerler | Keychain, servis adı `EnvSwitcher`, hesap adı `vault` (tek kayıt) |
-| Güncelleme kontrolü | `defaults read com.ahmetkorkmaz.envswitcher storedUpdate` |
-| Geri alma başarısız olursa eski içerik | `~/Library/Application Support/EnvSwitcher/recovery/` |
+| Projects, environments, values that are not secret | `~/Library/Application Support/EnvSwitcher/store.json` |
+| Last backup | `~/Library/Application Support/EnvSwitcher/store.json.bak` |
+| Secret values | Keychain, service name `EnvSwitcher`, account name `vault` (one item) |
+| Update check | `defaults read com.ahmetkorkmaz.envswitcher storedUpdate` |
+| Old content when a rollback fails | `~/Library/Application Support/EnvSwitcher/recovery/` |
 
-`store.json` bozulursa uygulama yedeği yükler ve bir uyarı gösterir.
+When `store.json` is damaged, the app loads the backup and shows a warning.
 
-## Katkı
+## Contributing
 
-Derleme, test, proje yapısı ve pull request kuralları: [CONTRIBUTING.md](CONTRIBUTING.md). Sürüm çıkarma adımları: [`docs/release.md`](docs/release.md).
+Build, tests, project structure, and pull request rules: [CONTRIBUTING.md](CONTRIBUTING.md). Release steps: [`docs/release.md`](docs/release.md).
 
-## Lisans
+## License
 
-MIT. Bkz. [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

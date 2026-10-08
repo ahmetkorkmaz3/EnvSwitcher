@@ -21,7 +21,7 @@ public struct EnvEnvironment: Codable, Equatable, Identifiable, Sendable {
         [
             EnvEnvironment(name: "local", color: .green),
             EnvEnvironment(name: "test", color: .orange),
-            EnvEnvironment(name: "canli", color: .red, isProtected: true),
+            EnvEnvironment(name: "prod", color: .red, isProtected: true),
         ]
     }
 }

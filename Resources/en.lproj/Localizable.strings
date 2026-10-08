@@ -101,7 +101,7 @@
 "Drag a folder here or choose one. The app finds the .env files." = "Drag a folder here or choose one. The app finds the .env files.";
 "This folder is already in the project %@. Choose a different folder." = "This folder is already in the project %@. Choose a different folder.";
 "This folder has no .env files." = "This folder has no .env files.";
-"Git tracks these files. Values from canli can get into a commit: %@" = "Git tracks these files. Values from canli can get into a commit: %@";
+"Git tracks these files. Values from prod can get into a commit: %@" = "Git tracks these files. Values from prod can get into a commit: %@";
 "No folder selected" = "No folder selected";
 "Change…" = "Change…";
 "Files Found (%lld)" = "Files Found (%lld)";

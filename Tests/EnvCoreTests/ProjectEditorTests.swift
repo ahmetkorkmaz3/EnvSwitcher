@@ -6,7 +6,7 @@ struct ProjectEditorTests {
     @Test func addsEnvironment() throws {
         let f = try ProjectFixture()
         let p = ProjectEditor(secrets: f.secrets).addEnvironment(named: "staging", color: .blue, to: f.project)
-        #expect(p.environments.map(\.name) == ["local", "test", "canli", "staging"])
+        #expect(p.environments.map(\.name) == ["local", "test", "prod", "staging"])
         #expect(p.environments.last?.color == .blue)
         #expect(p.environments.last?.isProtected == false)
     }
@@ -36,7 +36,7 @@ struct ProjectEditorTests {
 
         let p = try ProjectEditor(secrets: f.secrets).deleteEnvironment(id: test, from: f.project)
 
-        #expect(p.environments.map(\.name) == ["local", "canli"])
+        #expect(p.environments.map(\.name) == ["local", "prod"])
         #expect(p.targets[0].activeEnvironmentId == nil)
         #expect(p.targets[0].values[test.uuidString] == nil)
         #expect(f.secrets.snapshot.isEmpty)
@@ -48,7 +48,7 @@ struct ProjectEditorTests {
         var p = try editor.deleteEnvironment(id: f.local, from: f.project)
         p = try editor.deleteEnvironment(id: f.test, from: p)
         #expect(throws: ProjectEditor.EditError.lastEnvironment) {
-            try editor.deleteEnvironment(id: f.canli, from: p)
+            try editor.deleteEnvironment(id: f.prod, from: p)
         }
     }
 
@@ -72,9 +72,9 @@ struct ProjectEditorTests {
     @Test func deleteAllSecretsRemovesEverySecretOfProject() throws {
         var f = try ProjectFixture()
         f.setEntries([EnvEntry(key: "T1", value: nil, isSecret: true)], target: f.cart, env: f.local)
-        f.setEntries([EnvEntry(key: "T2", value: nil, isSecret: true)], target: f.shell, env: f.canli)
+        f.setEntries([EnvEntry(key: "T2", value: nil, isSecret: true)], target: f.shell, env: f.prod)
         try f.secrets.write("1", account: f.account(f.cart, f.local, "T1"))
-        try f.secrets.write("2", account: f.account(f.shell, f.canli, "T2"))
+        try f.secrets.write("2", account: f.account(f.shell, f.prod, "T2"))
         try f.secrets.write("other", account: "other-project")
 
         try ProjectEditor(secrets: f.secrets).deleteAllSecrets(of: f.project)

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title data-i18n="meta.title">EnvSwitcher — Switch .env environments with one click</title>
-  <meta name="description" data-i18n-attr="content:meta.description" content="EnvSwitcher is a macOS menu bar app that switches the .env files of a project between the local, test, and canli environments. Secret values stay in the Keychain.">
+  <meta name="description" data-i18n-attr="content:meta.description" content="EnvSwitcher is a macOS menu bar app that switches the .env files of a project between the local, test, and prod environments. Secret values stay in the Keychain.">
   <meta property="og:title" content="EnvSwitcher">
   <meta property="og:description" content="A macOS menu bar app that switches .env files between environments with one click.">
   <meta property="og:type" content="website">
@@ -227,7 +227,7 @@
     <div class="wrap">
       <img class="hero-icon" src="icon.png" alt="EnvSwitcher app icon" data-i18n-attr="alt:hero.iconAlt" width="104" height="104">
       <h1 data-i18n="hero.title">Switch <code style="all: unset">.env</code> environments<br><span class="grad">with one click.</span></h1>
-      <p class="lead" data-i18n="hero.lead">EnvSwitcher is a macOS menu bar app. Enter your values one time. Choose <code>local</code>, <code>test</code>, or <code>canli</code>. The app writes all <code>.env</code> files in the project again.</p>
+      <p class="lead" data-i18n="hero.lead">EnvSwitcher is a macOS menu bar app. Enter your values one time. Choose <code>local</code>, <code>test</code>, or <code>prod</code>. The app writes all <code>.env</code> files in the project again.</p>
 
       <div class="install">
         <pre aria-label="Install command" data-i18n-attr="aria-label:hero.cmdLabel"><span class="prompt">$ </span><span id="cmd">curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh</span></pre>
@@ -271,7 +271,7 @@
               <div class="label" data-i18n="demo.allFiles">All Files</div>
               <div class="row"><span class="check"></span><span class="dot green"></span>local</div>
               <div class="row hl"><span class="check">✓</span><span class="dot orange"></span>test</div>
-              <div class="row"><span class="check"></span><span class="dot red"></span>canli<span class="lock">🔒</span></div>
+              <div class="row"><span class="check"></span><span class="dot red"></span>prod<span class="lock">🔒</span></div>
               <div class="sep"></div>
               <div class="label" data-i18n="demo.files">Files</div>
               <div class="row">apps/cart/.env.local<span class="chev">›</span></div>
@@ -363,10 +363,10 @@
         <div class="scroll">
           <table>
             <thead>
-              <tr><th data-i18n="compare.key">Key</th><th><span class="dot green"></span>local</th><th><span class="dot orange"></span>test</th><th><span class="dot red"></span>canli</th></tr>
+              <tr><th data-i18n="compare.key">Key</th><th><span class="dot green"></span>local</th><th><span class="dot orange"></span>test</th><th><span class="dot red"></span>prod</th></tr>
             </thead>
             <tbody>
-              <tr><td class="key"><span class="mark orange"></span>APP_ENV</td><td class="val">local</td><td class="val">test</td><td class="val">canli</td></tr>
+              <tr><td class="key"><span class="mark orange"></span>APP_ENV</td><td class="val">local</td><td class="val">test</td><td class="val">prod</td></tr>
               <tr><td class="key"><span class="mark orange"></span>API_URL</td><td class="val">localhost:4000</td><td class="val">test.api.app</td><td class="val">api.app</td></tr>
               <tr><td class="key"><span class="mark red"></span>STRIPE_SECRET_KEY</td><td class="val">••••</td><td class="val">••••</td><td class="val missing" data-i18n="compare.missing">missing</td></tr>
               <tr><td class="key"><span class="mark red"></span>SENTRY_DSN</td><td class="val missing" data-i18n="compare.missing">missing</td><td class="val">••••</td><td class="val">••••</td></tr>
@@ -394,7 +394,7 @@
         </div>
         <div class="card">
           <h3 data-i18n="security.protected.title">Protected environments</h3>
-          <p data-i18n="security.protected.text">Before you switch to a protected environment such as <code>canli</code>, the app asks for confirmation.</p>
+          <p data-i18n="security.protected.text">Before you switch to a protected environment such as <code>prod</code>, the app asks for confirmation.</p>
         </div>
         <div class="card">
           <h3 data-i18n="security.empty.title">Empty environment warning</h3>
@@ -465,14 +465,14 @@ defaults delete com.ahmetkorkmaz.envswitcher</pre>
   // Turkish texts. The English texts are in the HTML, so the page works without this script.
   var TR = {
     "meta.title": "EnvSwitcher — .env ortamlarını tek tıkla değiştirin",
-    "meta.description": "EnvSwitcher, bir projedeki .env dosyalarını local, test ve canli ortamları arasında değiştiren bir macOS menü çubuğu uygulamasıdır. Gizli değerler Keychain içinde durur.",
+    "meta.description": "EnvSwitcher, bir projedeki .env dosyalarını local, test ve prod ortamları arasında değiştiren bir macOS menü çubuğu uygulamasıdır. Gizli değerler Keychain içinde durur.",
     "nav.label": "Ana menü",
     "nav.features": "Özellikler",
     "nav.security": "Güvenlik",
     "nav.install": "Kurulum",
     "hero.iconAlt": "EnvSwitcher uygulama ikonu",
     "hero.title": "<code style=\"all: unset\">.env</code> ortamlarını<br><span class=\"grad\">tek tıkla değiştirin.</span>",
-    "hero.lead": "EnvSwitcher bir macOS menü çubuğu uygulamasıdır. Değerleri bir kez girin. <code>local</code>, <code>test</code> veya <code>canli</code> seçin. Uygulama projedeki tüm <code>.env</code> dosyalarını yeniden yazar.",
+    "hero.lead": "EnvSwitcher bir macOS menü çubuğu uygulamasıdır. Değerleri bir kez girin. <code>local</code>, <code>test</code> veya <code>prod</code> seçin. Uygulama projedeki tüm <code>.env</code> dosyalarını yeniden yazar.",
     "hero.cmdLabel": "Kurulum komutu",
     "hero.badge.macos": "macOS 14 ve üstü",
     "hero.badge.arch": "Apple Silicon ve Intel",
@@ -513,7 +513,7 @@ defaults delete com.ahmetkorkmaz.envswitcher</pre>
     "how.3.title": "Ortamı seçin",
     "how.3.text": "<code>test</code> değerlerini girin. Menüden proje → <b>Tüm dosyalar → test</b> seçin.",
     "compare.eyebrow": "Karşılaştırma",
-    "compare.title": "Eksik anahtarı canlıya çıkmadan görün.",
+    "compare.title": "Eksik anahtarı prod ortamına çıkmadan görün.",
     "compare.lead": "Her anahtar bir satırda durur. Satırın rengi durumu gösterir.",
     "compare.red.title": "Kırmızı: bir ortamda eksik",
     "compare.red.text": "Hücreye bir değer yazın veya başka bir ortamdan kopyalayın.",
@@ -533,7 +533,7 @@ defaults delete com.ahmetkorkmaz.envswitcher</pre>
     "security.atomic.title": "Ya hep ya hiç yazma",
     "security.atomic.text": "Bir dosya yazılamazsa, yazılan dosyalar eski içeriğe döner.",
     "security.protected.title": "Korumalı ortam",
-    "security.protected.text": "<code>canli</code> gibi korumalı bir ortama geçmeden önce uygulama onay ister.",
+    "security.protected.text": "<code>prod</code> gibi korumalı bir ortama geçmeden önce uygulama onay ister.",
     "security.empty.title": "Boş ortam uyarısı",
     "security.empty.text": "Seçilen ortamda bir dosya için değer yoksa uygulama sorar. Dosyalar yanlışlıkla boşalmaz.",
     "security.perms.title": "İzinler korunur",
