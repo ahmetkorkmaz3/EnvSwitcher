@@ -1,85 +1,88 @@
-# Katkı rehberi
+# Contributing guide
 
-EnvSwitcher'a katkı için teşekkürler. Bu dosya geliştirme ortamını, test adımlarını ve pull request kurallarını anlatır.
+Thank you for your contribution to EnvSwitcher. This file describes the development setup, the test steps, and the pull request rules.
 
-## Hata bildirme ve öneri
+## Report a bug or make a suggestion
 
-1. Önce [Issues](https://github.com/ahmetkorkmaz3/EnvSwitcher/issues) sayfasında aynı konuyu arayın.
-2. Yeni bir issue açın. Şu bilgileri yazın:
-   - macOS sürümü ve işlemci (Apple Silicon veya Intel).
-   - EnvSwitcher sürümü. Sürüm menünün en altında görünür.
-   - Adımlar, beklenen sonuç ve gerçek sonuç.
-3. Issue içine gerçek `.env` değerlerini, token veya şifre yazmayın. Örnek değerler kullanın.
+1. First, search for the same topic on the [Issues](https://github.com/ahmetkorkmaz3/EnvSwitcher/issues) page.
+2. Open a new issue. Write this information:
+   - The macOS version and the processor (Apple Silicon or Intel).
+   - The EnvSwitcher version. The version shows at the bottom of the menu.
+   - The steps, the expected result, and the actual result.
+3. Do not write real `.env` values, tokens, or passwords in the issue. Use example values.
 
-Büyük bir değişiklikten önce bir issue açın ve fikri tartışın.
+Before a large change, open an issue and discuss the idea.
 
-## Geliştirme ortamı
+## Development setup
 
-**Gereksinimler:** macOS 14 veya üstü ve Xcode. Xcode'u aktif yapın:
+**Requirements:** macOS 14 or later and Xcode. Make Xcode the active developer directory:
 
 ```sh
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 sudo xcodebuild -license accept
 ```
 
-**Derleme ve çalıştırma:**
+**Build and run:**
 
 ```sh
-swift test                         # EnvCore testleri
-scripts/bundle.sh                  # build/EnvSwitcher.app oluşturur
+swift test                         # EnvCore tests
+scripts/bundle.sh                  # creates build/EnvSwitcher.app
 open build/EnvSwitcher.app
 ```
 
-**Gerçek Keychain testi:**
+**Real Keychain test:**
 
 ```sh
 ENVSWITCHER_KEYCHAIN_TESTS=1 swift test --filter VaultKeychainTests
 ```
 
-Bu test gerçek Keychain'e yazar. Bu nedenle varsayılan olarak çalışmaz.
+This test writes to the real Keychain. For this reason, it does not run by default.
 
-**Betik kontrolü:** CI tüm betikleri `shellcheck` ile kontrol eder. Push etmeden önce aynı kontrolü yapın:
+**Script check:** CI checks all scripts with `shellcheck`. Do the same check before you push:
 
 ```sh
 brew install shellcheck
 shellcheck scripts/*.sh install.sh
 ```
 
-### İmza ve Keychain izin sorusu
+**Translation check:** CI checks the `.strings` files with `scripts/check-strings.sh`. Run it after you change a text that the user sees.
 
-Keychain bir kaydı oluşturan uygulamayı imzası ile tanır. Ad-hoc imza her derlemede değişir. Bu nedenle ad-hoc bir derlemeden sonra macOS bir kez izin sorar. Tüm gizli değerler tek bir kayıtta durur, bu nedenle soru bir kez çıkar.
+### Signing and the Keychain permission prompt
 
-Bu soruyu önlemek için yerel bir sertifika ile imzalayın:
+The Keychain identifies the app that creates an item by its signature. An ad-hoc signature changes with each build. For this reason, macOS asks for permission one time after an ad-hoc build. All secret values are in one item, so the prompt shows one time.
 
-1. Sertifikayı bir kez oluşturun: `scripts/make-signing-cert.sh`. Sertifika zaten varsa ve `.p12` dosyası sizdeyse, dosyayı çift tıklayıp giriş Keychain'ine alın.
-2. Derleyin: `CODESIGN_IDENTITY="EnvSwitcher Self-Signed" scripts/bundle.sh`
+To prevent this prompt, sign with a local certificate:
 
-## Proje yapısı
+1. Create the certificate one time: `scripts/make-signing-cert.sh`. If the certificate already exists and you have the `.p12` file, double-click the file to import it into the login Keychain.
+2. Build: `CODESIGN_IDENTITY="EnvSwitcher Self-Signed" scripts/bundle.sh`
 
-| Klasör | İçerik |
+## Project structure
+
+| Folder | Content |
 |---|---|
-| `Sources/EnvCore` | Arayüzden bağımsız mantık: ayrıştırma, tarama, Keychain, ortam değiştirme. Testler bu modülü kapsar. |
-| `Sources/EnvSwitcher` | SwiftUI uygulaması: menü çubuğu, yönetim penceresi, fark penceresi. |
-| `Tests/EnvCoreTests` | Birim testleri. `Support/` içinde sahte dosya yazıcı ve sahte Keychain var. |
-| `site/` | Tanıtım sayfası. GitHub Pages bu klasörü yayınlar. |
-| `docs/manual-test.md` | Her sürümden önce uygulanacak elle test listesi. |
-| `docs/release.md` | Sürüm çıkarma adımları. |
-| `docs/superpowers/specs/` | Tasarım dokümanları. |
-| `scripts/` | Derleme, ikon, sertifika ve CHANGELOG betikleri. |
-| `install.sh` | Kurulum ve güncelleme betiği. |
-| `.github/workflows/` | CI, release ve Pages iş akışları. |
+| `Sources/EnvCore` | Logic without UI: parsing, scanning, Keychain, environment switching. The tests cover this module. |
+| `Sources/EnvSwitcher` | The SwiftUI app: menu bar, manage window, difference window. |
+| `Resources/` | App icon and the `en` and `tr` translation files. |
+| `Tests/EnvCoreTests` | Unit tests. `Support/` has a fake file writer and a fake Keychain. |
+| `site/` | The website. GitHub Pages publishes this folder. |
+| `docs/manual-test.md` | The manual test list to do before each release. |
+| `docs/release.md` | Release steps. |
+| `docs/superpowers/specs/` | Design documents. |
+| `scripts/` | Build, icon, certificate, translation, and CHANGELOG scripts. |
+| `install.sh` | Install and update script. |
+| `.github/workflows/` | CI, release, and Pages workflows. |
 
-## Kod kuralları
+## Code rules
 
-- Mantığı `EnvCore` içine yazın. `EnvSwitcher` modülü yalnızca arayüzü içerir.
-- `EnvCore` içindeki her değişiklik için bir test ekleyin. Disk ve Keychain için `Tests/EnvCoreTests/Support` içindeki sahte sınıfları kullanın.
-- Gizli değerleri log, hata mesajı veya `store.json` içine yazmayın.
-- Kullanıcıya görünen metinler Türkçedir. Kısa ve net cümleler kullanın.
-- Çevresindeki kodun stilini izleyin.
+- Write the logic in `EnvCore`. The `EnvSwitcher` module contains only the UI.
+- Add a test for each change in `EnvCore`. For the disk and the Keychain, use the fake classes in `Tests/EnvCoreTests/Support`.
+- Do not write secret values to logs, error messages, or `store.json`.
+- The app shows its texts in English and Turkish. Add each new text to both `Resources/en.lproj/Localizable.strings` and `Resources/tr.lproj/Localizable.strings`. Use short and clear sentences.
+- Follow the style of the code around your change.
 
-## Commit mesajları
+## Commit messages
 
-Commit mesajları İngilizce ve [Conventional Commits](https://www.conventionalcommits.org/) biçimindedir:
+Write commit messages in English, in the [Conventional Commits](https://www.conventionalcommits.org/) format:
 
 ```
 feat(core): check GitHub for a newer release
@@ -87,28 +90,28 @@ fix: keep the old app when the install copy fails
 ci: use actions/checkout@v5, because v4 runs on the deprecated Node.js 20
 ```
 
-Kullanılan türler: `feat`, `fix`, `docs`, `ci`, `build`, `test`, `refactor`. Kapsam isteğe bağlıdır: `core` veya `app`. Bir nedeni varsa mesaja `because` ile ekleyin.
+Types in use: `feat`, `fix`, `docs`, `ci`, `build`, `test`, `refactor`. The scope is optional: `core`, `app`, or `site`. When there is a reason, add it to the message with `because`.
 
-## Pull request
+## Pull requests
 
-1. `main` dalından yeni bir dal açın. Örnek: `feat/compare-filter`, `fix/install-path`.
-2. Değişikliği yapın. `swift test` ve `shellcheck` komutlarını çalıştırın.
-3. Arayüz değiştiyse ekran görüntüsü ekleyin.
-4. Kullanıcının göreceği bir değişiklik varsa `CHANGELOG.md` dosyasının başında `## [Yayınlanmadı]` bölümüne bir satır ekleyin.
-5. Pull request açın. CI geçince inceleme başlar.
+1. Create a new branch from `main`. Examples: `feat/compare-filter`, `fix/install-path`.
+2. Make the change. Run `swift test`, `shellcheck`, and `scripts/check-strings.sh`.
+3. When the UI changes, add a screenshot.
+4. When the user can see the change, add a line to the `## [Unreleased]` section at the top of `CHANGELOG.md`.
+5. Open the pull request. The review starts when CI passes.
 
-## Tanıtım sayfası
+## Website
 
-Tanıtım sayfası `site/index.html` dosyasıdır. Sayfa tek bir HTML dosyasıdır. Derleme adımı yoktur.
+The website is the `site/index.html` file. The page is one HTML file. It has no build step.
 
-- Yerelde görmek için: `open site/index.html`
-- `main` dalına push edince `.github/workflows/pages.yml` sayfayı yayınlar.
-- İlk yayından önce bir kez: GitHub → Settings → Pages → Source → **GitHub Actions** seçin.
+- To see it locally: `open site/index.html`
+- When you push to the `main` branch, `.github/workflows/pages.yml` publishes the page.
+- One time before the first publish: go to GitHub → Settings → Pages → Source and choose **GitHub Actions**.
 
-## Sürüm çıkarma
+## Releases
 
-Sürüm adımları: [`docs/release.md`](docs/release.md). Sürümden önce [`docs/manual-test.md`](docs/manual-test.md) listesini uygulayın.
+Release steps: [`docs/release.md`](docs/release.md). Before a release, do the steps in [`docs/manual-test.md`](docs/manual-test.md).
 
-## Lisans
+## License
 
-Katkılarınız [MIT lisansı](LICENSE) ile yayınlanır.
+Your contributions are published under the [MIT license](LICENSE).

@@ -1,34 +1,40 @@
-# Değişiklikler
+# Changelog
 
-Bu dosya [Keep a Changelog](https://keepachangelog.com/tr-TR/1.1.0/) biçimini kullanır. Sürümler [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar.
+This file uses the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Versions follow [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Changed
+
+- The default protected environment is now `prod`, not `canli`. Existing projects keep their environment names.
 
 ## [0.3.0] - 2026-10-08
 
-### Eklenenler
+### Added
 
-- İngilizce ve Türkçe dil desteği. Uygulama ilk açılışta macOS dilini kullanır. Dil Ayarlar'dan değişir.
-- Landing page İngilizce açılır. TR düğmesi sayfayı Türkçe yapar.
+- English and Turkish language support. On the first start, the app uses the macOS language. You can change the language in Settings.
+- The website opens in English. The TR button shows the page in Turkish.
 
-### Değişenler
+### Changed
 
-- `.env` dosyalarının başlık yorumu İngilizce yazılır.
+- The header comment of the `.env` files is in English.
 
 ## [0.2.0] - 2026-10-08
 
-İlk herkese açık sürüm.
+The first public release.
 
-### Eklenenler
+### Added
 
-- Menü çubuğundan bir projenin tüm `.env` dosyalarını veya tek bir dosyayı başka bir ortama geçirme.
-- Proje ekleme: klasör tarama, `.gitignore` uyarısı, mevcut değerleri `local` ortamına aktarma.
-- Düzenleme penceresi: değer düzenleme, `.env` önizleme, panodan `KEY=değer` yapıştırma.
-- Karşılaştırma görünümü: bir dosyanın değerlerini ortamlar arasında yan yana görme, eksik anahtarları kopyalama.
-- Güvenlik önlemleri: elle değişiklik kontrolü, boş ortam uyarısı, ya hep ya hiç yazma, korumalı ortam onayı.
-- Gizli değerler macOS Keychain içinde tek bir kayıtta durur.
-- Menüde yeni sürüm bildirimi ve sürüm satırı.
-- Tek komutla kurulum ve güncelleme: `install.sh`.
-- Apple Silicon ve Intel desteği.
+- Switch all `.env` files of a project, or one file, to a different environment from the menu bar.
+- Add a project: scan the folder, show a `.gitignore` warning, and import the current values into the `local` environment.
+- Edit window: edit values, preview the `.env` file, and paste `KEY=value` lines from the clipboard.
+- Compare view: see the values of a file side by side across environments, and copy the missing keys.
+- Safety checks: manual change check, empty environment warning, all-or-nothing writes, and confirmation for protected environments.
+- Secret values stay in one item in the macOS Keychain.
+- A new release notice and a version item in the menu.
+- Install and update with one command: `install.sh`.
+- Apple Silicon and Intel support.
 
-### Değişenler
+### Changed
 
-- 0.2.0'dan önceki derlemeler her gizli değeri ayrı bir Keychain kaydında tutar. Uygulama bu kayıtları ilk açılışta tek kayda taşır.
+- Builds before 0.2.0 keep each secret value in a separate Keychain item. On the first start, the app moves these items into one item.
