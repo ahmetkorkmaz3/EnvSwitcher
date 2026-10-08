@@ -2,7 +2,7 @@
 
 Bu dosya [Keep a Changelog](https://keepachangelog.com/tr-TR/1.1.0/) biçimini kullanır. Sürümler [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar.
 
-## [Yayımlanmadı]
+## [0.3.0] - 2026-10-08
 
 ### Eklenenler
 
