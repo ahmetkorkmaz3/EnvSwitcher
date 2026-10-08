@@ -21,4 +21,22 @@ struct VaultKeychainTests {
         #expect(try backend.readItem(account: account) == nil)
         #expect(try !backend.listAccounts().contains(account))
     }
+
+    @Test func vaultMovesLegacyItemsInTheRealKeychain() throws {
+        let legacy = "test/\(UUID().uuidString)"
+        defer {
+            try? backend.deleteItem(account: legacy)
+            try? backend.deleteItem(account: VaultSecretStore.vaultAccount)
+        }
+        try backend.writeItem(Data("legacy value".utf8), account: legacy)
+
+        let store = VaultSecretStore(backend: backend)
+        #expect(try store.read(account: legacy) == "legacy value")
+        try store.write("new", account: "other")
+        #expect(try backend.listAccounts().contains(legacy) == false)
+
+        let reopened = VaultSecretStore(backend: backend)
+        #expect(try reopened.read(account: "other") == "new")
+        #expect(try reopened.read(account: legacy) == "legacy value")
+    }
 }

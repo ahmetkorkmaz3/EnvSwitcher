@@ -54,13 +54,14 @@ final class AppState {
 
     init(
         repository: StoreRepository = StoreRepository(directory: StoreRepository.defaultDirectory),
-        secrets: any SecretStore = KeychainSecretStore(),
+        secrets: any SecretStore = VaultSecretStore(),
         files: any FileWriter = LocalFileWriter()
     ) {
         self.repository = repository
         self.secrets = secrets
         self.files = files
         load()
+        openVault()
         // Spec 6.1: check drift when the user opens the menu.
         NotificationCenter.default.addObserver(forName: NSMenu.didBeginTrackingNotification, object: nil, queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.refreshDrift() }
@@ -92,6 +93,17 @@ final class AppState {
             }
         } catch {
             loadFailed = true
+            let text = message(for: error)
+            DispatchQueue.main.async { Alerts.showError(text) }
+        }
+    }
+
+    /// Spec 2026-10-08, 3.4: opens the vault at launch, so a failed migration shows its alert at once.
+    private func openVault() {
+        guard let vault = secrets as? VaultSecretStore else { return }
+        do {
+            try vault.open()
+        } catch {
             let text = message(for: error)
             DispatchQueue.main.async { Alerts.showError(text) }
         }
@@ -340,6 +352,10 @@ final class AppState {
             return "Ortam veya dosya bulunamadı. Pencereyi kapatıp yeniden açın."
         case SecretStoreError.keychain(let status):
             return "Keychain erişimi başarısız oldu (kod \(status))."
+        case SecretStoreError.vaultCorrupt:
+            return "Keychain'deki EnvSwitcher kaydı bozuk. Gizli değerler okunamıyor. Uygulama bu kaydı değiştirmedi."
+        case SecretStoreError.migrationFailed:
+            return "Keychain'deki gizli değerler taşınamadı. Uygulamayı yeniden açın ve izin verin."
         case EntryEditor.EditError.duplicateKey(let key):
             return "\(key) anahtarı zaten var."
         case EntryEditor.EditError.invalidKey(let key):

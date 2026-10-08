@@ -40,18 +40,4 @@ struct SecretsTests {
     func suggestsSecrets(key: String, expected: Bool) {
         #expect(SecretSuggester.isLikelySecret(key) == expected)
     }
-
-    /// Uses the real login keychain. Run with: ENVSWITCHER_KEYCHAIN_TESTS=1 swift test --filter SecretsTests
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["ENVSWITCHER_KEYCHAIN_TESTS"] == "1"))
-    func keychainStoreReadsWritesAndDeletes() throws {
-        let store = KeychainSecretStore(service: "EnvSwitcher.tests")
-        let account = "test/\(UUID().uuidString)"
-        defer { try? store.delete(account: account) }
-        #expect(try store.read(account: account) == nil)
-        try store.write("first", account: account)
-        try store.write("second ğüşİ", account: account)
-        #expect(try store.read(account: account) == "second ğüşİ")
-        try store.delete(account: account)
-        #expect(try store.read(account: account) == nil)
-    }
 }
