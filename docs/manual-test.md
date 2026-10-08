@@ -62,7 +62,23 @@ scripts/bundle.sh && open build/EnvSwitcher.app
    - Beklenen: "Değişiklikler diske yazılmadı" uyarısı çıkar. "Diske yaz" sonrası uyarı "Diskteki dosya güncel" olur.
 5. `chmod 600 apps/cart/.env.local` çalıştırın ve ortam değiştirin. Beklenen: `ls -l` hâlâ `-rw-------` gösterir.
 
-## 6. Arayüz
+## 6. Ortam karşılaştırma
+
+1. `apps/cart/.env.local` dosyasını seçin ve **Karşılaştır** görünümüne geçin.
+   - Beklenen: her anahtar bir satırda, `local`, `test`, `canli` değerleri yan yana görünür.
+   - Beklenen: `test` ve `canli` boşsa tüm satırlar kırmızı işaretle "eksik" gösterir.
+2. Bir satırda **Eksiklere kopyala → local değerini kopyala** seçin.
+   - Beklenen: değer `test` ve `canli` hücrelerine yazılır. İşaret gri olur.
+3. `test` hücresindeki değeri değiştirip Return tuşuna basın.
+   - Beklenen: satır turuncu "farklı" işaretini alır. **Farklı** filtresinde görünür.
+4. Boş bir `canli` hücresine değer yazın ve başka bir hücreye tıklayın.
+   - Beklenen: anahtar `canli` ortamına eklenir.
+5. Gizli bir anahtarı eksik bir ortama kopyalayın.
+   - Beklenen: yeni değer de gizli olur. `store.json` içinde değer görünmez.
+6. **Düzenle** görünümüne dönün ve eksik anahtarı olan bir ortam seçin.
+   - Beklenen: alt çubukta "N anahtar bu ortamda eksik" düğmesi çıkar. Düğme Karşılaştır görünümünü Eksik filtresiyle açar.
+
+## 7. Arayüz
 
 1. Sistem ayarlarından koyu moda geçin. Beklenen: pencere, menü ve sheet okunur kalır.
 2. Menüdeki ortam noktaları ortam renklerini gösterir.

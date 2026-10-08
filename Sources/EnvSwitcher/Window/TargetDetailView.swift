@@ -9,6 +9,11 @@ private struct EditableRow: Identifiable, Equatable {
     var isRevealed = false
 }
 
+private enum DetailMode: Hashable {
+    case edit
+    case compare
+}
+
 private struct ReloadKey: Hashable {
     let targetId: UUID
     let environmentId: UUID
@@ -24,6 +29,8 @@ struct TargetDetailView: View {
     @State private var rows: [EditableRow] = []
     @State private var selectedKeys = Set<String>()
     @State private var showPreview = false
+    @State private var mode = DetailMode.edit
+    @State private var compareFilter = CompareFilter.all
     /// The key/value pairs in the file on disk. nil when the file is missing.
     @State private var diskPairs: [DotEnvPair]?
 
@@ -45,28 +52,11 @@ struct TargetDetailView: View {
         VStack(spacing: 0) {
             header
             Divider()
-            Table(rows, selection: $selectedKeys) {
-                TableColumn("Anahtar") { row in
-                    KeyField(key: row.key) { rename(row.key, to: $0) }
-                }
-                TableColumn("Değer") { row in
-                    ValueField(
-                        row: row,
-                        onChange: { setValue($0, for: row.key) },
-                        onReveal: { toggleReveal(row.key) }
-                    )
-                }
-                TableColumn("Gizli") { row in
-                    Toggle("", isOn: Binding(get: { row.isSecret }, set: { setSecret($0, for: row.key) }))
-                        .labelsHidden()
-                        .toggleStyle(.checkbox)
-                        .help("Değeri Keychain'de sakla")
-                }
-                .width(44)
+            if mode == .compare {
+                CompareView(projectId: project.id, targetId: target.id, filter: $compareFilter)
+            } else {
+                editor
             }
-            .font(.system(.body, design: .monospaced))
-            Divider()
-            bottomBar
         }
         .navigationTitle(currentTarget.relativePath)
         .navigationSubtitle("\(currentProject.name) · diskte: \(state.environmentName(currentTarget.activeEnvironmentId, in: currentProject))")
@@ -74,23 +64,60 @@ struct TargetDetailView: View {
         .task(id: ReloadKey(targetId: target.id, environmentId: environmentId)) { reload() }
         // A write can follow "Mevcut ortama kaydet", which changes the stored values too.
         .task(id: currentTarget.lastWrittenHash) { reload() }
+        // The compare view can change any environment.
+        .onChange(of: mode) { if mode == .edit { reload() } }
         .sheet(isPresented: $showPreview) { preview }
     }
 
     // MARK: Parts
 
+    @ViewBuilder
+    private var editor: some View {
+        Table(rows, selection: $selectedKeys) {
+            TableColumn("Anahtar") { row in
+                KeyField(key: row.key) { rename(row.key, to: $0) }
+            }
+            TableColumn("Değer") { row in
+                ValueField(
+                    row: row,
+                    onChange: { setValue($0, for: row.key) },
+                    onReveal: { toggleReveal(row.key) }
+                )
+            }
+            TableColumn("Gizli") { row in
+                Toggle("", isOn: Binding(get: { row.isSecret }, set: { setSecret($0, for: row.key) }))
+                    .labelsHidden()
+                    .toggleStyle(.checkbox)
+                    .help("Değeri Keychain'de sakla")
+            }
+            .width(44)
+        }
+        .font(.system(.body, design: .monospaced))
+        Divider()
+        bottomBar
+    }
+
     private var header: some View {
         HStack {
-            Picker("Düzenlenen ortam", selection: Binding(get: { environmentId }, set: { editingEnvironmentId = $0 })) {
-                ForEach(currentProject.environments) { environment in
-                    Text(environment.isProtected ? "\(environment.name) 🔒" : environment.name).tag(environment.id)
-                }
+            Picker("Görünüm", selection: $mode) {
+                Label("Düzenle", systemImage: "square.and.pencil").tag(DetailMode.edit)
+                Label("Karşılaştır", systemImage: "rectangle.split.3x1").tag(DetailMode.compare)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
             .fixedSize()
+            if mode == .edit {
+                Picker("Düzenlenen ortam", selection: Binding(get: { environmentId }, set: { editingEnvironmentId = $0 })) {
+                    ForEach(currentProject.environments) { environment in
+                        Text(environment.isProtected ? "\(environment.name) 🔒" : environment.name).tag(environment.id)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
             Spacer()
-            status
+            if mode == .edit { status }
         }
         .padding(12)
     }
@@ -152,6 +179,7 @@ struct TargetDetailView: View {
                 .disabled(selectedKeys.isEmpty)
                 .help("Seçili anahtarları sil")
             Spacer()
+            missingHint
             Menu("Diğer ortamdan kopyala") {
                 ForEach(currentProject.environments.filter { $0.id != environmentId }) { environment in
                     Button(environment.name) { copy(from: environment.id) }
@@ -161,6 +189,22 @@ struct TargetDetailView: View {
         }
         .buttonStyle(.borderless)
         .padding(8)
+    }
+
+    /// Points to the compare view when other environments have keys that this one lacks.
+    @ViewBuilder
+    private var missingHint: some View {
+        let missing = EnvComparer.missingKeys(in: environmentId, target: currentTarget, project: currentProject)
+        if !missing.isEmpty {
+            Button {
+                compareFilter = .missing
+                mode = .compare
+            } label: {
+                Label("\(missing.count) anahtar bu ortamda eksik", systemImage: "exclamationmark.circle.fill")
+                    .foregroundStyle(.red)
+            }
+            .help(missing.joined(separator: ", "))
+        }
     }
 
     private var preview: some View {

@@ -83,4 +83,35 @@ struct EntryEditorTests {
         let overwritten = try editor.copyEntries(from: f.local, to: f.test, targetId: f.cart.id, mode: .overwrite, in: f.project)
         #expect(overwritten.targets[0].entries(for: f.test)[0] == EnvEntry(key: "A", value: "1"))
     }
+
+    @Test func upsertAddsAMissingPlainKey() throws {
+        let (f, editor) = try setUp()
+        let p = try editor.upsertValue("2", key: "B", isSecret: false, in: f.project, targetId: f.cart.id, environmentId: f.test)
+        #expect(p.targets[0].entries(for: f.test) == [EnvEntry(key: "B", value: "2")])
+    }
+
+    @Test func upsertAddsAMissingSecretKeyToTheSecretStore() throws {
+        let (f, editor) = try setUp()
+        let p = try editor.upsertValue("t1", key: "TOKEN", isSecret: true, in: f.project, targetId: f.cart.id, environmentId: f.test)
+        #expect(p.targets[0].entries(for: f.test) == [EnvEntry(key: "TOKEN", value: nil, isSecret: true)])
+        #expect(try f.secrets.read(account: f.account(f.cart, f.test, "TOKEN")) == "t1")
+    }
+
+    @Test func upsertChangesAnExistingKeyAndKeepsItsSecretFlag() throws {
+        let (f, editor) = try setUp()
+        var p = try editor.upsertValue("9", key: "A", isSecret: true, in: f.project, targetId: f.cart.id, environmentId: f.local)
+        p = try editor.upsertValue("t9", key: "TOKEN", isSecret: false, in: p, targetId: f.cart.id, environmentId: f.local)
+        #expect(p.targets[0].entries(for: f.local) == [
+            EnvEntry(key: "A", value: "9"),
+            EnvEntry(key: "TOKEN", value: nil, isSecret: true),
+        ])
+        #expect(try f.secrets.read(account: f.account(f.cart, f.local, "TOKEN")) == "t9")
+    }
+
+    @Test func upsertRejectsAnInvalidKey() throws {
+        let (f, editor) = try setUp()
+        #expect(throws: EntryEditor.EditError.invalidKey("1X")) {
+            try editor.upsertValue("v", key: "1X", isSecret: false, in: f.project, targetId: f.cart.id, environmentId: f.local)
+        }
+    }
 }

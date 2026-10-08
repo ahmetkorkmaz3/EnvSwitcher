@@ -11,8 +11,8 @@ EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren 
 1. Uygulamayı derleyin ve açın (bkz. [Derleme](#derleme)). Menü çubuğunda `EnvSwitcher` yazısı görünür.
 2. Menüden **Proje Ekle…** seçin. Proje klasörünü seçin veya pencereye sürükleyin.
 3. Bulunan `.env` dosyalarını kontrol edin. **Ekle** düğmesine basın. Dosyaların mevcut içeriği `local` ortamına aktarılır.
-4. **Yönet…** penceresinde bir dosya seçin. Üstten `test` ortamını seçin.
-5. **Diğer ortamdan kopyala → local** ile değerleri kopyalayın. Sonra `test` için farklı olan değerleri değiştirin.
+4. **Yönet…** penceresinde bir dosya seçin. Üstten **Karşılaştır** görünümünü seçin.
+5. Eksik anahtarlar için **Eksiklere kopyala → local değerini kopyala** seçin. Sonra `test` için farklı olan değerleri değiştirin.
 6. Menüden proje → **Tüm dosyalar → test** seçin. Tüm dosyalar `test` değerleriyle yazılır.
 
 ## Kavramlar
@@ -38,6 +38,15 @@ EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren 
 - Anahtar adını değiştirdikten sonra Return tuşuna basın veya başka bir alana geçin.
 - Diskteki ortamı düzenlerseniz "Değişiklikler diske yazılmadı" uyarısı çıkar. **Diske yaz** düğmesine basın.
 - **.env önizle** düğmesi, yazılacak dosyayı gösterir. Gizli değerler `••••••••` olarak görünür.
+
+**Ortamları karşılaştırma (Yönet… → dosya → Karşılaştır):**
+- Her anahtar bir satırda durur. Her ortamın değeri yan yana görünür.
+- Satırın başındaki işaret durumu gösterir: kırmızı = bir ortamda eksik, turuncu = değerler farklı, gri = tüm ortamlarda aynı.
+- **Eksik** ve **Farklı** filtreleri yalnızca ilgili satırları gösterir.
+- Eksik bir hücreye değer yazıp Return tuşuna basın. Anahtar o ortama eklenir.
+- **Eksiklere kopyala** bir ortamın değerini, anahtarın olmadığı tüm ortamlara yazar.
+- Gizli değerler `••••` olarak görünür. Satırdaki göz düğmesi değerleri gösterir.
+- Düzenle görünümünde bir ortamda eksik anahtar varsa, alt çubukta "N anahtar bu ortamda eksik" düğmesi çıkar.
 
 **Proje ayarları (kenar çubuğunda proje adı):**
 - Ortam ekleyin, adını, rengini ve korumasını değiştirin.

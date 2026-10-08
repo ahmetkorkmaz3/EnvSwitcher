@@ -55,6 +55,27 @@ public struct EntryEditor: Sendable {
         }
     }
 
+    /// Sets the value. When the environment does not have the key, adds it at the end first.
+    /// `isSecret` applies only to a new key. An existing key keeps its secret flag.
+    public func upsertValue(_ value: String, key: String, isSecret: Bool, in project: Project, targetId: UUID, environmentId: UUID) throws -> Project {
+        guard DotEnvParser.isValidKey(key) else { throw EditError.invalidKey(key) }
+        return try mutate(project, targetId, environmentId) { entries in
+            let secretAccount = account(project, targetId, environmentId, key)
+            if let i = entries.firstIndex(where: { $0.key == key }) {
+                if entries[i].isSecret {
+                    try secrets.write(value, account: secretAccount)
+                } else {
+                    entries[i].value = value
+                }
+            } else if isSecret {
+                try secrets.write(value, account: secretAccount)
+                entries.append(EnvEntry(key: key, value: nil, isSecret: true))
+            } else {
+                entries.append(EnvEntry(key: key, value: value))
+            }
+        }
+    }
+
     public func setSecret(_ isSecret: Bool, key: String, in project: Project, targetId: UUID, environmentId: UUID) throws -> Project {
         try mutate(project, targetId, environmentId) { entries in
             let i = try index(of: key, in: entries)
