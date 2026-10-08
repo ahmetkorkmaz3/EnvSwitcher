@@ -1,0 +1,72 @@
+<!doctype html>
+<!-- Source of site/og-image.png. Render it with scripts/make-og-image.sh. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root {
+    --bg: #f7f8fb;
+    --surface: #ffffff;
+    --text: #12151c;
+    --muted: #5a6273;
+    --border: #dde2ec;
+    --accent: #2563eb;
+    --accent-2: #3d99fa;
+    --green: #22a55b;
+    --orange: #f08c1a;
+    --red: #e5484d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(circle at 85% 20%, rgba(61, 153, 250, .18), transparent 45%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    align-items: center;
+    padding: 0 80px;
+    gap: 64px;
+  }
+  .text { flex: 1; }
+  .brand { display: flex; align-items: center; gap: 18px; margin-bottom: 36px; }
+  .brand img { width: 72px; height: 72px; }
+  .brand span { font-size: 34px; font-weight: 700; letter-spacing: -.5px; }
+  h1 { font-size: 64px; line-height: 1.08; letter-spacing: -1.5px; margin: 0 0 24px; font-weight: 800; }
+  h1 .grad { background: linear-gradient(90deg, var(--accent-2), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  p { font-size: 24px; color: var(--muted); margin: 0; }
+  .menu {
+    width: 340px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 30px 60px -25px rgba(18, 30, 60, .35);
+    font-size: 22px;
+  }
+  .row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 8px; }
+  .row.active { background: var(--accent); color: #fff; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+  .green { background: var(--green); }
+  .orange { background: var(--orange); }
+  .red { background: var(--red); }
+  .row .check { margin-left: auto; font-weight: 700; }
+  .label { font-size: 16px; color: var(--muted); padding: 6px 16px 2px; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <div class="brand"><img src="../site/icon.png" alt=""><span>EnvSwitcher</span></div>
+    <h1>Switch .env environments<br><span class="grad">with one click.</span></h1>
+    <p>A macOS menu bar app. Secrets stay in the Keychain.</p>
+  </div>
+  <div class="menu">
+    <div class="label">All files</div>
+    <div class="row"><span class="dot green"></span>local</div>
+    <div class="row active"><span class="dot orange"></span>test<span class="check">✓</span></div>
+    <div class="row"><span class="dot red"></span>prod</div>
+  </div>
+</body>
+</html>
