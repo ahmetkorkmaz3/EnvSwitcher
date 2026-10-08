@@ -50,7 +50,19 @@ scripts/bundle.sh && open build/EnvSwitcher.app
    - Beklenen: anahtar adı görünür, ama değeri görünmez (`"value"` alanı yok).
 2. Pencerede bir değerin "Gizli" kutusunu kaldırın. Beklenen: değer görünür hale gelir ve `store.json` içine yazılır.
 
-## 5. Arayüz
+## 5. Ekleme ve düzenleme
+
+1. "Proje Ekle…" ile zaten ekli olan `/tmp/karaca-copy` klasörünü yeniden seçin.
+   - Beklenen: "Bu klasör zaten karaca-copy projesinde" uyarısı çıkar. "Ekle" düğmesi pasif kalır.
+2. Yeni bir projede, `test` ortamına hiç değer girmeden "Tüm dosyalar → test" seçin.
+   - Beklenen: "test ortamında bu dosyalar için değer yok" uyarısı çıkar. "Vazgeç" ile hiçbir dosya değişmez.
+3. `mkdir -p /tmp/karaca-copy/apps/new && echo A=1 > /tmp/karaca-copy/apps/new/.env.local` çalıştırın. Proje ayarlarında "Dosya ekle" ile ekleyin.
+   - Beklenen: dosya, projenin diskteki ortamına `A=1` değeriyle eklenir. Menüyü açınca ⚠︎ görünmez.
+4. Diskteki ortamda bir değeri değiştirin.
+   - Beklenen: "Değişiklikler diske yazılmadı" uyarısı çıkar. "Diske yaz" sonrası uyarı "Diskteki dosya güncel" olur.
+5. `chmod 600 apps/cart/.env.local` çalıştırın ve ortam değiştirin. Beklenen: `ls -l` hâlâ `-rw-------` gösterir.
+
+## 6. Arayüz
 
 1. Sistem ayarlarından koyu moda geçin. Beklenen: pencere, menü ve sheet okunur kalır.
 2. Menüdeki ortam noktaları ortam renklerini gösterir.
