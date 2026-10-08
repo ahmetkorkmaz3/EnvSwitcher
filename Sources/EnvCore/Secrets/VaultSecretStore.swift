@@ -71,8 +71,33 @@ public final class VaultSecretStore: SecretStore, @unchecked Sendable {
         }
     }
 
+    /// Reads the vault, then moves items from before version 0.2.0 into it (spec 3.4).
+    /// A vault value wins over a legacy value, so a half-done migration finishes on the next launch.
     private func load() throws -> [String: String] {
-        try readVault()
+        var secrets = try readVault()
+        let legacy = try backend.listAccounts().filter { $0 != Self.vaultAccount }
+        guard !legacy.isEmpty else { return secrets }
+
+        var added = false
+        for account in legacy where secrets[account] == nil {
+            let data: Data?
+            do {
+                data = try backend.readItem(account: account)
+            } catch SecretStoreError.keychain(let status) {
+                throw SecretStoreError.migrationFailed(status: status)
+            }
+            guard let data else { continue }
+            secrets[account] = String(decoding: data, as: UTF8.self)
+            added = true
+        }
+        if added {
+            try backend.writeItem(try encode(secrets), account: Self.vaultAccount)
+        }
+        for account in legacy {
+            // A failed delete is tried again on the next launch.
+            try? backend.deleteItem(account: account)
+        }
+        return secrets
     }
 
     private func readVault() throws -> [String: String] {
