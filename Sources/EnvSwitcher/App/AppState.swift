@@ -229,6 +229,10 @@ final class AppState {
                !Alerts.confirmProtected(projectName: project.name, environmentName: preflight.environment.name, fileCount: preflight.targetIds.count) {
                 return .stopped
             }
+            if !preflight.emptyTargets.isEmpty,
+               !Alerts.confirmEmpty(environmentName: preflight.environment.name, paths: preflight.emptyTargets) {
+                return .stopped
+            }
             if !preflight.drifted.isEmpty {
                 pendingDrift = PendingDrift(projectId: projectId, scope: scope, environmentId: environmentId, drifted: preflight.drifted, observed: preflight.observed)
                 return .needsDriftReview

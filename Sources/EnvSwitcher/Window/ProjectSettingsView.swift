@@ -36,7 +36,7 @@ struct ProjectSettingsView: View {
                     EnvironmentRow(project: current, environment: environment)
                 }
                 Button {
-                    state.apply { state.projectEditor.addEnvironment(named: "yeni", color: .blue, to: current) }
+                    state.apply { state.projectEditor.addEnvironment(named: newEnvironmentName, color: .blue, to: current) }
                 } label: {
                     Label("Ortam ekle", systemImage: "plus")
                 }
@@ -51,9 +51,7 @@ struct ProjectSettingsView: View {
                         Text("Eklenecek yeni .env dosyası yok")
                     }
                     ForEach(newFiles, id: \.relativePath) { file in
-                        Button(file.relativePath) {
-                            state.apply { try state.projectEditor.addTarget(relativePath: file.relativePath, to: current) }
-                        }
+                        Button("\(file.relativePath) (\(file.keyCount) anahtar)") { addTarget(file.relativePath) }
                     }
                 }
                 .fixedSize()
@@ -70,6 +68,30 @@ struct ProjectSettingsView: View {
             Button("Sil", role: .destructive) { state.deleteProject(current) }
         } message: {
             Text("Kayıtlı değerler ve Keychain kayıtları silinir. Diskteki .env dosyaları değişmez.")
+        }
+    }
+
+    /// "yeni", then "yeni 2", "yeni 3" and so on.
+    private var newEnvironmentName: String {
+        let names = Set(current.environments.map(\.name))
+        var name = "yeni"
+        var n = 2
+        while names.contains(name) {
+            name = "yeni \(n)"
+            n += 1
+        }
+        return name
+    }
+
+    /// The file's current contents become the values of the project's disk environment.
+    private func addTarget(_ relativePath: String) {
+        do {
+            let result = try ProjectImporter(secrets: state.secrets).addTarget(relativePath: relativePath, to: current)
+            state.replace(result.project)
+            state.refreshDrift()
+            Alerts.showImportWarnings(result.warnings)
+        } catch {
+            state.report(error)
         }
     }
 

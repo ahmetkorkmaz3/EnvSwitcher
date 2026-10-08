@@ -24,6 +24,16 @@ struct AddProjectSheet: View {
                 fileList
                 form
             }
+            if let existingProject {
+                Label("Bu klasör zaten \(existingProject.name) projesinde. Başka bir klasör seçin.", systemImage: "xmark.octagon.fill")
+                    .symbolRenderingMode(.multicolor)
+                    .font(.callout)
+            }
+            if root != nil, files.isEmpty {
+                Label("Bu klasörde .env dosyası bulunamadı.", systemImage: "info.circle")
+                    .foregroundStyle(.secondary)
+                    .font(.callout)
+            }
             if !trackedFiles.isEmpty {
                 Label(
                     "Bu dosyalar git tarafından izleniyor. canli değerler commit'e girebilir: \(trackedFiles.joined(separator: ", "))",
@@ -137,8 +147,15 @@ struct AddProjectSheet: View {
 
     // MARK: Logic
 
+    /// The project that already manages this folder. Two projects on the same files would fight.
+    private var existingProject: Project? {
+        guard let root else { return nil }
+        let path = root.standardizedFileURL.path
+        return state.store.projects.first { $0.rootPath == path }
+    }
+
     private var canAdd: Bool {
-        root != nil && !selected.isEmpty && importEnvironmentId != nil
+        root != nil && existingProject == nil && !selected.isEmpty && importEnvironmentId != nil
             && !name.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
@@ -152,6 +169,8 @@ struct AddProjectSheet: View {
     }
 
     private func choose(_ url: URL) {
+        // A dropped .env file means its folder.
+        let url = url.hasDirectoryPath || FileManager.default.directoryExists(url) ? url : url.deletingLastPathComponent()
         root = url
         name = url.lastPathComponent
         files = ProjectScanner.scan(root: url)
@@ -192,25 +211,9 @@ struct AddProjectSheet: View {
             state.replace(result.project)
             state.selection = .project(result.project.id)
             dismiss()
-            if !result.warnings.isEmpty {
-                Alerts.showInfo(title: "Bazı satırlar okunamadı", message: Self.describe(result.warnings))
-            }
+            Alerts.showImportWarnings(result.warnings)
         } catch {
             state.report(error)
         }
-    }
-
-    private static func describe(_ warnings: [String: [DotEnvWarning]]) -> String {
-        warnings.keys.sorted().map { path in
-            let lines = warnings[path]!.map { warning -> String in
-                switch warning {
-                case .invalidLine(let line): "satır \(line): okunamadı"
-                case .unterminatedQuote(let line): "satır \(line): tırnak kapanmıyor"
-                case .duplicateKey(let key, let line): "satır \(line): \(key) iki kez var, son değer kullanıldı"
-                }
-            }
-            return "\(path)\n  " + lines.joined(separator: "\n  ")
-        }
-        .joined(separator: "\n\n")
     }
 }

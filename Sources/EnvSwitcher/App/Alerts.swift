@@ -47,6 +47,37 @@ enum Alerts {
         return alert.runModal() == .alertSecondButtonReturn
     }
 
+    /// Asks before a switch writes files that have no values in the chosen environment.
+    static func confirmEmpty(environmentName: String, paths: [String]) -> Bool {
+        NSApp.activate()
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "\(environmentName) ortamında bu dosyalar için değer yok."
+        alert.informativeText = """
+            Geçerseniz bu dosyalar boş yazılır: \(paths.joined(separator: ", ")).
+            Değerleri girmek için düzenleme penceresini açın veya "Diğer ortamdan kopyala" düğmesini kullanın.
+            """
+        alert.addButton(withTitle: "Vazgeç")
+        alert.addButton(withTitle: "Yine de geç")
+        return alert.runModal() == .alertSecondButtonReturn
+    }
+
+    static func showImportWarnings(_ warnings: [String: [DotEnvWarning]]) {
+        guard !warnings.isEmpty else { return }
+        let text = warnings.keys.sorted().map { path in
+            let lines = warnings[path]!.map { warning -> String in
+                switch warning {
+                case .invalidLine(let line): "satır \(line): okunamadı"
+                case .unterminatedQuote(let line): "satır \(line): tırnak kapanmıyor"
+                case .duplicateKey(let key, let line): "satır \(line): \(key) iki kez var, son değer kullanıldı"
+                }
+            }
+            return "\(path)\n  " + lines.joined(separator: "\n  ")
+        }
+        .joined(separator: "\n\n")
+        showInfo(title: "Bazı satırlar okunamadı", message: text)
+    }
+
     /// Returns nil when the user cancels.
     static func chooseCopyMode() -> EntryEditor.CopyMode? {
         NSApp.activate()

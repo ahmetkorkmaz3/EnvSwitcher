@@ -24,6 +24,8 @@ struct TargetDetailView: View {
     @State private var rows: [EditableRow] = []
     @State private var selectedKeys = Set<String>()
     @State private var showPreview = false
+    /// The key/value pairs in the file on disk. nil when the file is missing.
+    @State private var diskPairs: [DotEnvPair]?
 
     /// The project and target from the store. The init values can be one edit old.
     private var currentProject: Project { state.project(id: project.id) ?? project }
@@ -70,6 +72,8 @@ struct TargetDetailView: View {
         .navigationSubtitle("\(currentProject.name) · diskte: \(state.environmentName(currentTarget.activeEnvironmentId, in: currentProject))")
         .toolbar { toolbar }
         .task(id: ReloadKey(targetId: target.id, environmentId: environmentId)) { reload() }
+        // A write can follow "Mevcut ortama kaydet", which changes the stored values too.
+        .task(id: currentTarget.lastWrittenHash) { reload() }
         .sheet(isPresented: $showPreview) { preview }
     }
 
@@ -86,13 +90,38 @@ struct TargetDetailView: View {
             .labelsHidden()
             .fixedSize()
             Spacer()
-            if environmentId == currentTarget.activeEnvironmentId {
-                Label("Değişiklikleri diske yazmak için Bu ortama geç düğmesine basın.", systemImage: "info.circle")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-            }
+            status
         }
         .padding(12)
+    }
+
+    @ViewBuilder
+    private var status: some View {
+        if !isOnDisk {
+            Label("Diskte \(state.environmentName(currentTarget.activeEnvironmentId, in: currentProject)) var. Bu değerler, bu ortama geçince yazılır.", systemImage: "info.circle")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        } else if hasUnwrittenChanges {
+            HStack {
+                Label("Değişiklikler diske yazılmadı.", systemImage: "exclamationmark.circle.fill")
+                    .font(.callout)
+                    .foregroundStyle(.orange)
+                Button("Diske yaz") { switchHere() }
+            }
+        } else {
+            Label("Diskteki dosya güncel.", systemImage: "checkmark.circle.fill")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    /// True when the file on disk belongs to the edited environment.
+    private var isOnDisk: Bool { environmentId == currentTarget.activeEnvironmentId }
+
+    /// True when the edited values differ from the values in the file on disk.
+    /// Compares values, not bytes: an imported file has no header and can have comments.
+    private var hasUnwrittenChanges: Bool {
+        isOnDisk && diskPairs != rows.map { DotEnvPair(key: $0.key, value: $0.value) }
     }
 
     @ToolbarContentBuilder
@@ -104,13 +133,14 @@ struct TargetDetailView: View {
             Button { showPreview = true } label: {
                 Label(".env önizle", systemImage: "eye")
             }
-            Button {
-                let outcome = state.requestSwitch(projectId: project.id, scope: .target(target.id), environmentId: environmentId)
-                if outcome == .needsDriftReview { openWindow(id: WindowID.drift) }
-            } label: {
-                Label("Bu ortama geç", systemImage: "arrow.triangle.2.circlepath")
+            Button { switchHere() } label: {
+                if isOnDisk {
+                    Label("Diske yaz", systemImage: "square.and.arrow.down")
+                } else {
+                    Label("Bu ortama geç", systemImage: "arrow.triangle.2.circlepath")
+                }
             }
-            .help("Yalnızca bu dosyayı seçili ortama geçirir")
+            .help(isOnDisk ? "Bu ortamın değerlerini dosyaya yeniden yazar" : "Yalnızca bu dosyayı seçili ortama geçirir")
         }
     }
 
@@ -156,6 +186,11 @@ struct TargetDetailView: View {
 
     // MARK: Actions
 
+    private func switchHere() {
+        let outcome = state.requestSwitch(projectId: project.id, scope: .target(target.id), environmentId: environmentId)
+        if outcome == .needsDriftReview { openWindow(id: WindowID.drift) }
+    }
+
     private func reload() {
         let project = currentProject
         rows = currentTarget.entries(for: environmentId).map { entry in
@@ -163,6 +198,12 @@ struct TargetDetailView: View {
             return EditableRow(key: entry.key, value: value, isSecret: entry.isSecret)
         }
         selectedKeys = []
+        readDisk()
+    }
+
+    private func readDisk() {
+        let data = (try? state.files.read(currentProject.url(for: currentTarget))) ?? nil
+        diskPairs = data.map { DotEnvParser.parse(String(decoding: $0, as: UTF8.self)).pairs }
     }
 
     private func setValue(_ value: String, for key: String) {
@@ -212,7 +253,8 @@ struct TargetDetailView: View {
     }
 }
 
-/// Renames the key on Return, so a half-typed key never reaches the store.
+/// Renames the key on Return or when the field loses focus, so a half-typed key never reaches the store.
+/// An invalid key on focus loss goes back to the stored key without an error.
 private struct KeyField: View {
     let key: String
     let onCommit: (String) -> Void
@@ -230,7 +272,11 @@ private struct KeyField: View {
             }
             .onAppear { draft = key }
             .onChange(of: key) { draft = key }
-            .onChange(of: isFocused) { if !isFocused { draft = key } }
+            .onChange(of: isFocused) {
+                guard !isFocused else { return }
+                if draft != key, DotEnvParser.isValidKey(draft) { onCommit(draft) }
+                draft = key
+            }
     }
 }
 
