@@ -11,18 +11,18 @@ EnvSwitcher, bir projedeki `.env` dosyalarını ortamlar arasında değiştiren 
 Terminalde şu komutu çalıştırın:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
 ```
 
 Komut son sürümü indirir, SHA-256 değerini kontrol eder, `/Applications` içine kurar ve uygulamayı açar. Gereksinim: macOS 14 veya üstü. Apple Silicon ve Intel desteklenir.
 
 **Güncelleme:** Aynı komutu yeniden çalıştırın. Yeni bir sürüm çıkınca menüde "Güncelleme var" satırı görünür. Bu satır komutu panoya kopyalar.
 
-**Belirli bir sürüm:** `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh`
+**Belirli bir sürüm:** `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh`
 
 **Elle kurulum:**
 
-1. [Releases](https://github.com/ahmetkorkmaz3/env-management/releases) sayfasından `EnvSwitcher-X.Y.Z.zip` dosyasını indirin.
+1. [Releases](https://github.com/ahmetkorkmaz3/EnvSwitcher/releases) sayfasından `EnvSwitcher-X.Y.Z.zip` dosyasını indirin.
 2. Zip dosyasını açın. `EnvSwitcher.app` dosyasını `/Applications` içine taşıyın.
 3. Uygulamayı açın. macOS "Apple doğrulayamadı" uyarısını gösterir. **Bitti** düğmesine basın.
 4. Sistem Ayarları → Gizlilik ve Güvenlik sayfasını açın. Sayfanın altında **Yine de Aç** düğmesine basın.

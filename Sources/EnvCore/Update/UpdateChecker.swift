@@ -2,7 +2,7 @@ import Foundation
 
 /// Where releases live. install.sh uses the same repository and command.
 public enum ReleaseInfo {
-    public static let repository = "ahmetkorkmaz3/env-management"
+    public static let repository = "ahmetkorkmaz3/EnvSwitcher"
     public static let latestReleaseAPI = URL(string: "https://api.github.com/repos/\(repository)/releases/latest")!
     public static let installCommand = "curl -fsSL https://raw.githubusercontent.com/\(repository)/main/install.sh | sh"
 }

@@ -23,7 +23,7 @@
 5. Kurulum komutunu deneyin:
 
    ```sh
-   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh
+   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
    ```
 
 6. `docs/manual-test.md` bölüm 9 adımlarını uygulayın.

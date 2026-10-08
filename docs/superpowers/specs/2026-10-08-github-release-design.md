@@ -200,13 +200,13 @@ README bu komutu gösterir.
 Konum: repo kökünde `install.sh`. Komut:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
 ```
 
 Betik POSIX `sh` kullanır. `jq` istemez. Adımlar:
 
 1. macOS dışında bir sistemde dur. macOS 14'ten eski bir sürümde dur.
-2. Sürümü bul. `ENVSWITCHER_VERSION` değişkeni varsa bu sürümü kullan. Yoksa `https://api.github.com/repos/ahmetkorkmaz3/env-management/releases/latest` adresinden `tag_name` değerini oku.
+2. Sürümü bul. `ENVSWITCHER_VERSION` değişkeni varsa bu sürümü kullan. Yoksa `https://api.github.com/repos/ahmetkorkmaz3/EnvSwitcher/releases/latest` adresinden `tag_name` değerini oku.
 3. `mktemp -d` ile geçici bir klasör oluştur. Betik çıkınca klasörü sil (`trap`).
 4. `.zip` ve `.sha256` dosyalarını indir. `shasum -a 256 -c` ile kontrol et. Hash uymazsa dur.
 5. `ditto -x -k` ile zip dosyasını aç.

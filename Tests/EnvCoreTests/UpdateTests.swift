@@ -55,7 +55,7 @@ private struct FailingHTTPClient: HTTPClient {
 
 struct UpdateCheckerTests {
     let current = SemanticVersion("0.2.0")!
-    let page = "https://github.com/ahmetkorkmaz3/env-management/releases/tag/v0.3.0"
+    let page = "https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/tag/v0.3.0"
 
     private func body(tag: String) -> String {
         #"{"tag_name":"\#(tag)","html_url":"\#(page)","name":"x","assets":[]}"#

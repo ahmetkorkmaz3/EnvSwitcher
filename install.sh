@@ -1,13 +1,13 @@
 #!/bin/sh
 # Installs or updates EnvSwitcher from GitHub Releases (spec 2026-10-08, section 6).
-#   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
 # ENVSWITCHER_VERSION=0.2.0 installs that version.
 # ENVSWITCHER_DOWNLOAD_BASE and ENVSWITCHER_INSTALL_DIR are for tests only.
 # All code is in main(), so a download that stops partway runs nothing.
 set -eu
 
 main() {
-    REPO="ahmetkorkmaz3/env-management"
+    REPO="ahmetkorkmaz3/EnvSwitcher"
     APP_NAME="EnvSwitcher"
     DEST_DIR="${ENVSWITCHER_INSTALL_DIR:-/Applications}"
 

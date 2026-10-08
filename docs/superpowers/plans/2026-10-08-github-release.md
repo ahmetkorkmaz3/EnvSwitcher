@@ -19,7 +19,7 @@
 - Hesap adı `SecretAccount.make` çıktısıdır ve değişmez.
 - İmza kimliği adı: `EnvSwitcher Self-Signed`.
 - GitHub secret adları: `SIGNING_CERT_P12_BASE64`, `SIGNING_CERT_PASSWORD`.
-- Repo: `ahmetkorkmaz3/env-management`. Kurulum komutu: `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh`
+- Repo: `ahmetkorkmaz3/EnvSwitcher`. Kurulum komutu: `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh`
 - Release dosyaları: `EnvSwitcher-X.Y.Z.zip` ve `EnvSwitcher-X.Y.Z.zip.sha256`.
 - Kullanıcıya görünen metinler Türkçe. Kod yorumları İngilizce. Commit mesajları İngilizce, Conventional Commits.
 - Her commit mesajı şu satırla biter: `Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>`
@@ -972,7 +972,7 @@ private struct FailingHTTPClient: HTTPClient {
 
 struct UpdateCheckerTests {
     let current = SemanticVersion("0.2.0")!
-    let page = "https://github.com/ahmetkorkmaz3/env-management/releases/tag/v0.3.0"
+    let page = "https://github.com/ahmetkorkmaz3/EnvSwitcher/releases/tag/v0.3.0"
 
     private func body(tag: String) -> String {
         #"{"tag_name":"\#(tag)","html_url":"\#(page)","name":"x","assets":[]}"#
@@ -1039,7 +1039,7 @@ import Foundation
 
 /// Where releases live. install.sh uses the same repository and command.
 public enum ReleaseInfo {
-    public static let repository = "ahmetkorkmaz3/env-management"
+    public static let repository = "ahmetkorkmaz3/EnvSwitcher"
     public static let latestReleaseAPI = URL(string: "https://api.github.com/repos/\(repository)/releases/latest")!
     public static let installCommand = "curl -fsSL https://raw.githubusercontent.com/\(repository)/main/install.sh | sh"
 }
@@ -1595,12 +1595,12 @@ git commit -m "build: add a script that creates the self-signed signing certific
 ```sh
 #!/bin/sh
 # Installs or updates EnvSwitcher from GitHub Releases (spec 2026-10-08, section 6).
-#   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
 # ENVSWITCHER_VERSION=0.2.0 installs that version.
 # ENVSWITCHER_DOWNLOAD_BASE and ENVSWITCHER_INSTALL_DIR are for tests only.
 set -eu
 
-REPO="ahmetkorkmaz3/env-management"
+REPO="ahmetkorkmaz3/EnvSwitcher"
 APP_NAME="EnvSwitcher"
 DEST_DIR="${ENVSWITCHER_INSTALL_DIR:-/Applications}"
 
@@ -1978,7 +1978,7 @@ Bu dosya [Keep a Changelog](https://keepachangelog.com/tr-TR/1.1.0/) biçimini k
 5. Kurulum komutunu deneyin:
 
    ```sh
-   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh
+   curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
    ```
 
 6. `docs/manual-test.md` bölüm 9 adımlarını uygulayın.
@@ -2007,18 +2007,18 @@ Apple Developer hesabı gelince şu adımları uygulayın:
 Terminalde şu komutu çalıştırın:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | sh
 ```
 
 Komut son sürümü indirir, SHA-256 değerini kontrol eder, `/Applications` içine kurar ve uygulamayı açar. Gereksinim: macOS 14 veya üstü. Apple Silicon ve Intel desteklenir.
 
 **Güncelleme:** Aynı komutu yeniden çalıştırın. Yeni bir sürüm çıkınca menüde "Güncelleme var" satırı görünür. Bu satır komutu panoya kopyalar.
 
-**Belirli bir sürüm:** `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/env-management/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh`
+**Belirli bir sürüm:** `curl -fsSL https://raw.githubusercontent.com/ahmetkorkmaz3/EnvSwitcher/main/install.sh | ENVSWITCHER_VERSION=0.2.0 sh`
 
 **Elle kurulum:**
 
-1. [Releases](https://github.com/ahmetkorkmaz3/env-management/releases) sayfasından `EnvSwitcher-X.Y.Z.zip` dosyasını indirin.
+1. [Releases](https://github.com/ahmetkorkmaz3/EnvSwitcher/releases) sayfasından `EnvSwitcher-X.Y.Z.zip` dosyasını indirin.
 2. Zip dosyasını açın. `EnvSwitcher.app` dosyasını `/Applications` içine taşıyın.
 3. Uygulamayı açın. macOS "Apple doğrulayamadı" uyarısını gösterir. **Bitti** düğmesine basın.
 4. Sistem Ayarları → Gizlilik ve Güvenlik sayfasını açın. Sayfanın altında **Yine de Aç** düğmesine basın.
