@@ -71,16 +71,9 @@ struct ProjectSettingsView: View {
         }
     }
 
-    /// "yeni", then "yeni 2", "yeni 3" and so on.
+    /// "new", then "new 2", "new 3" and so on, in the app language.
     private var newEnvironmentName: String {
-        let names = Set(current.environments.map(\.name))
-        var name = "yeni"
-        var n = 2
-        while names.contains(name) {
-            name = "yeni \(n)"
-            n += 1
-        }
-        return name
+        UniqueName.numbered(base: String(localized: "new"), existing: Set(current.environments.map(\.name)))
     }
 
     /// The file's current contents become the values of the project's disk environment.

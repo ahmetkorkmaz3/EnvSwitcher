@@ -274,10 +274,7 @@ struct TargetDetailView: View {
     }
 
     private func addRow() {
-        let existing = Set(rows.map(\.key))
-        var n = 1
-        while existing.contains("YENI_ANAHTAR_\(n)") { n += 1 }
-        let key = "YENI_ANAHTAR_\(n)"
+        let key = UniqueName.newKey(existing: Set(rows.map(\.key)))
         state.apply { try state.entryEditor.addEntry(key: key, in: currentProject, targetId: target.id, environmentId: environmentId) }
         reload()
     }
@@ -322,7 +319,7 @@ struct TargetDetailView: View {
         }
         state.apply { try state.entryEditor.pasteEntries(parsed.pairs, mode: mode, in: project, targetId: target.id, environmentId: environmentId) }
         reload()
-        Alerts.showImportWarnings(parsed.warnings.isEmpty ? [:] : ["Pano": parsed.warnings])
+        Alerts.showImportWarnings(parsed.warnings.isEmpty ? [:] : [String(localized: "Clipboard"): parsed.warnings])
     }
 
     private func copy(from source: UUID) {
