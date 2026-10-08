@@ -10,12 +10,14 @@ permissions:
 jobs:
   release:
     runs-on: macos-26
-    env:
-      KEYCHAIN: ${{ runner.temp }}/signing.keychain-db
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      # The runner context is not available in job-level env, so the path goes through GITHUB_ENV.
+      - name: Set the signing keychain path
+        run: echo "KEYCHAIN=$RUNNER_TEMP/signing.keychain-db" >> "$GITHUB_ENV"
 
       - name: Read the version from the tag
         id: version
@@ -49,6 +51,7 @@ jobs:
           security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
           # codesign finds an untrusted self-signed identity only in a keychain on the search list.
+          # shellcheck disable=SC2046 # The keychain paths have no spaces on GitHub runners.
           security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
           rm "$RUNNER_TEMP/cert.p12"
 
