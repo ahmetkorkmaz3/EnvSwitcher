@@ -69,6 +69,13 @@ struct SwitchPlannerTests {
         #expect(result.targetIds == [f.cart.id, f.shell.id])
     }
 
+    @Test func preflightListsFilesWithNoValuesInTheEnvironment() throws {
+        var f = try ProjectFixture()
+        f.setEntries([EnvEntry(key: "A", value: "1")], target: f.cart, env: f.test)
+        let result = try SwitchPlanner(secrets: f.secrets).preflight(project: f.project, scope: .project, environmentId: f.test)
+        #expect(result.emptyTargets == ["apps/shell/.env.local"])
+    }
+
     @Test func preflightIgnoresMissingAndCleanFiles() throws {
         var f = try ProjectFixture()
         try TempDir.write("A=1\n", to: "apps/cart/.env.local", in: f.root)

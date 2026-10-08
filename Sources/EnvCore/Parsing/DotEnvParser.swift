@@ -82,7 +82,7 @@ public enum DotEnvParser {
         return ParsedDotEnv(pairs: pairs, warnings: warnings)
     }
 
-    static func isValidKey(_ key: String) -> Bool {
+    public static func isValidKey(_ key: String) -> Bool {
         guard let first = key.first, first == "_" || (first.isASCII && first.isLetter) else { return false }
         return key.allSatisfy { c in
             c == "_" || c == "." || c == "-" || (c.isASCII && (c.isLetter || c.isNumber))

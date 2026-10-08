@@ -18,8 +18,15 @@ public struct LocalFileWriter: FileWriter {
         return try Data(contentsOf: url)
     }
 
+    /// Writes through a symlink to the real file and keeps the old file permissions (for example 600).
     public func write(_ data: Data, to url: URL) throws {
-        try data.write(to: url, options: .atomic)
+        let fm = FileManager.default
+        let destination = url.resolvingSymlinksInPath()
+        let permissions = try? fm.attributesOfItem(atPath: destination.path)[.posixPermissions]
+        try data.write(to: destination, options: .atomic)
+        if let permissions {
+            try fm.setAttributes([.posixPermissions: permissions], ofItemAtPath: destination.path)
+        }
     }
 
     public func remove(_ url: URL) throws {

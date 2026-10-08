@@ -45,15 +45,6 @@ public struct ProjectEditor: Sendable {
         return updated
     }
 
-    public func addTarget(relativePath: String, to project: Project) throws -> Project {
-        guard !project.targets.contains(where: { $0.relativePath == relativePath }) else {
-            throw EditError.duplicateTarget(relativePath)
-        }
-        var updated = project
-        updated.targets.append(EnvTarget(relativePath: relativePath))
-        return updated
-    }
-
     public func removeTarget(id: UUID, from project: Project) throws -> Project {
         guard let target = project.targets.first(where: { $0.id == id }) else { throw EditError.unknownTarget }
         for environment in project.environments {

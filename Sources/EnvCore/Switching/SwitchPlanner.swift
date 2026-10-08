@@ -40,6 +40,8 @@ public struct SwitchPreflight: Equatable, Sendable {
     public var targetIds: [UUID]
     public var missingDirectories: [String]
     public var drifted: [DriftedTarget]
+    /// Files that have no values in the chosen environment. The switch writes them with the header only.
+    public var emptyTargets: [String]
     /// The bytes preflight read for each in-scope target whose folder exists. nil = the file was missing.
     public var observed: [UUID: Data?]
 
@@ -95,7 +97,15 @@ public struct SwitchPlanner: Sendable {
                 fileContents: text
             ))
         }
-        return SwitchPreflight(environment: environment, targetIds: targets.map(\.id), missingDirectories: missing, drifted: drifted, observed: observed)
+        let empty = targets.filter { $0.entries(for: environmentId).isEmpty }.map(\.relativePath)
+        return SwitchPreflight(
+            environment: environment,
+            targetIds: targets.map(\.id),
+            missingDirectories: missing,
+            drifted: drifted,
+            emptyTargets: empty,
+            observed: observed
+        )
     }
 
     /// Step 4: builds the new file contents in memory. Writes nothing to disk.

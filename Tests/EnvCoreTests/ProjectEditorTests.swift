@@ -52,21 +52,14 @@ struct ProjectEditorTests {
         }
     }
 
-    @Test func addsAndRemovesTargets() throws {
+    @Test func removesTargetsAndTheirSecrets() throws {
         var f = try ProjectFixture()
         let local = f.local
         f.setEntries([EnvEntry(key: "TOKEN", value: nil, isSecret: true)], target: f.cart, env: local)
         try f.secrets.write("t", account: f.account(f.cart, local, "TOKEN"))
-        let editor = ProjectEditor(secrets: f.secrets)
 
-        var p = try editor.addTarget(relativePath: "apps/plp/.env.local", to: f.project)
-        #expect(p.targets.map(\.relativePath) == ["apps/cart/.env.local", "apps/shell/.env.local", "apps/plp/.env.local"])
-        #expect(throws: ProjectEditor.EditError.duplicateTarget("apps/plp/.env.local")) {
-            try editor.addTarget(relativePath: "apps/plp/.env.local", to: p)
-        }
-
-        p = try editor.removeTarget(id: f.cart.id, from: p)
-        #expect(p.targets.map(\.relativePath) == ["apps/shell/.env.local", "apps/plp/.env.local"])
+        let p = try ProjectEditor(secrets: f.secrets).removeTarget(id: f.cart.id, from: f.project)
+        #expect(p.targets.map(\.relativePath) == ["apps/shell/.env.local"])
         #expect(f.secrets.snapshot.isEmpty)
     }
 
