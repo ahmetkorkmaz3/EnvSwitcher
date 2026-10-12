@@ -195,3 +195,25 @@
 "Copy to Missing" = "Copy to Missing";
 "Clipboard" = "Clipboard";
 "new" = "new";
+
+/* Export and import */
+"%@ → %@ · keys: %lld" = "%@ → %@ · keys: %lld";
+"An environment with this name already exists." = "An environment with this name already exists.";
+"Choose a .env file to import." = "Choose a .env file to import.";
+"Destination" = "Destination";
+"Environment" = "Environment";
+"Export" = "Export";
+"Export This Environment…" = "Export This Environment…";
+"Exports the values of this environment as a .env file, or imports a .env file" = "Exports the values of this environment as a .env file, or imports a .env file";
+"Import" = "Import";
+"Import .env File" = "Import .env File";
+"Import .env File…" = "Import .env File…";
+"Imported" = "Imported";
+"New environment" = "New environment";
+"Replace" = "Replace";
+"Replace an environment" = "Replace an environment";
+"Share" = "Share";
+"The file holds secret values in plain text. Send it only to people you trust." = "The file holds secret values in plain text. Send it only to people you trust.";
+"The file replaces the values of the %@ environment." = "The file replaces the values of the %@ environment.";
+"The values in the file replace the values of this environment. Keys that are not in the file are removed." = "The values in the file replace the values of this environment. Keys that are not in the file are removed.";
+"This environment is protected. Keys that are not in the file are removed." = "This environment is protected. Keys that are not in the file are removed.";

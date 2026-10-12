@@ -4,6 +4,11 @@ This file uses the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) form
 
 ## [Unreleased]
 
+### Added
+
+- Export one environment of a file as a plain `.env` file, so you can send it to another person. Secret values are in plain text in the file.
+- Import a `.env` file into a new environment, or replace the values of an existing environment.
+
 ## [0.4.0] - 2026-10-08
 
 ### Changed
