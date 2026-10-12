@@ -123,4 +123,16 @@ enum Alerts {
         alert.addButton(withTitle: String(localized: "Cancel"))
         return alert.runModal() == .alertFirstButtonReturn
     }
+
+    /// Asks before an imported file replaces the values of a protected environment.
+    static func confirmReplaceProtected(environmentName: String) -> Bool {
+        NSApp.activate()
+        let alert = NSAlert()
+        alert.alertStyle = .critical
+        alert.messageText = String(localized: "The file replaces the values of the \(environmentName.uppercased()) environment.")
+        alert.informativeText = String(localized: "This environment is protected. Keys that are not in the file are removed.")
+        alert.addButton(withTitle: String(localized: "Replace"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
+        return alert.runModal() == .alertFirstButtonReturn
+    }
 }

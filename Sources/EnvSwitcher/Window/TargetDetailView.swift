@@ -33,6 +33,7 @@ struct TargetDetailView: View {
     @State private var compareFilter = CompareFilter.all
     /// The key/value pairs in the file on disk. nil when the file is missing.
     @State private var diskPairs: [DotEnvPair]?
+    @State private var pendingImport: PendingEnvImport?
 
     /// The project and target from the store. The init values can be one edit old.
     private var currentProject: Project { state.project(id: project.id) ?? project }
@@ -67,6 +68,9 @@ struct TargetDetailView: View {
         // The compare view can change any environment.
         .onChange(of: mode) { if mode == .edit { reload() } }
         .sheet(isPresented: $showPreview) { preview }
+        .sheet(item: $pendingImport) { file in
+            ImportEnvironmentSheet(project: currentProject, target: currentTarget, file: file) { editingEnvironmentId = $0 }
+        }
     }
 
     // MARK: Parts
@@ -160,6 +164,13 @@ struct TargetDetailView: View {
             Button { showPreview = true } label: {
                 Label("Preview .env", systemImage: "eye")
             }
+            Menu {
+                Button("Export This Environment…") { exportEnvironment() }
+                Button("Import .env File…") { chooseImport() }
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
+            .help("Exports the values of this environment as a .env file, or imports a .env file")
             Button { switchHere() } label: {
                 if isOnDisk {
                     Label("Write to Disk", systemImage: "square.and.arrow.down")
@@ -237,6 +248,36 @@ struct TargetDetailView: View {
     private func switchHere() {
         let outcome = state.requestSwitch(projectId: project.id, scope: .target(target.id), environmentId: environmentId)
         if outcome == .needsDriftReview { openWindow(id: WindowID.drift) }
+    }
+
+    /// Writes the values of the edited environment to a .env file. Secret values are in plain text.
+    private func exportEnvironment() {
+        let project = currentProject
+        guard let environment = project.environment(id: environmentId) else { return }
+        let text: String
+        do {
+            text = try EnvironmentTransfer(secrets: state.secrets).exportText(project: project, targetId: target.id, environmentId: environmentId)
+        } catch {
+            state.report(error)
+            return
+        }
+        let name = "\(project.name)-\(environment.name).env".replacingOccurrences(of: "/", with: "-")
+        guard let url = Panels.saveEnvFile(suggestedName: name) else { return }
+        do {
+            try Data(text.utf8).write(to: url, options: .atomic)
+        } catch {
+            state.report(error)
+        }
+    }
+
+    private func chooseImport() {
+        guard let url = Panels.chooseEnvFile() else { return }
+        do {
+            let data = try Data(contentsOf: url)
+            pendingImport = PendingEnvImport(fileName: url.lastPathComponent, text: String(decoding: data, as: UTF8.self))
+        } catch {
+            state.report(error)
+        }
     }
 
     private func reload() {

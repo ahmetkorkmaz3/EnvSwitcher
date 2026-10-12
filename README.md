@@ -85,6 +85,8 @@ These commands do not change your `.env` files.
 - When you edit the environment on disk, the window shows "The changes are not on disk yet." Click **Write to Disk**.
 - **Preview .env** shows the file that the app will write. Secret values show as `••••••••`.
 - **Paste from Clipboard** adds the `KEY=value` lines on the clipboard to the selected environment.
+- **Share → Export This Environment…** saves the values of the selected environment as a `.env` file. The file holds secret values in plain text. Send it only to people you trust.
+- **Share → Import .env File…** reads a `.env` file into a new environment or replaces the values of an existing environment. The app asks again before it replaces a protected environment.
   - The app adds the keys that are not in the environment. It fills the empty values. It asks no question.
   - When a key has a different value, the app asks: **Overwrite** or **Add Only Missing Keys**.
   - When a new key looks like a secret (`_KEY`, `TOKEN`, `SECRET`), the app writes it to the Keychain.

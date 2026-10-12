@@ -195,3 +195,25 @@
 "Copy to Missing" = "Eksiklere kopyala";
 "Clipboard" = "Pano";
 "new" = "yeni";
+
+/* Export and import */
+"%@ → %@ · keys: %lld" = "%@ → %@ · %lld anahtar";
+"An environment with this name already exists." = "Bu isimde bir ortam zaten var.";
+"Choose a .env file to import." = "İçe aktarılacak .env dosyasını seçin.";
+"Destination" = "Hedef";
+"Environment" = "Ortam";
+"Export" = "Dışa Aktar";
+"Export This Environment…" = "Bu ortamı dışa aktar…";
+"Exports the values of this environment as a .env file, or imports a .env file" = "Bu ortamın değerlerini .env dosyası olarak dışa aktarır veya bir .env dosyasını içe aktarır";
+"Import" = "İçe Aktar";
+"Import .env File" = ".env dosyasını içe aktar";
+"Import .env File…" = ".env dosyasını içe aktar…";
+"Imported" = "İçe aktarılan";
+"New environment" = "Yeni ortam";
+"Replace" = "Değiştir";
+"Replace an environment" = "Var olan ortamın yerine yaz";
+"Share" = "Paylaş";
+"The file holds secret values in plain text. Send it only to people you trust." = "Dosya gizli değerleri açık metin olarak içerir. Dosyayı yalnızca güvendiğiniz kişilere gönderin.";
+"The file replaces the values of the %@ environment." = "Dosya %@ ortamının değerlerinin yerine yazılacak.";
+"The values in the file replace the values of this environment. Keys that are not in the file are removed." = "Dosyadaki değerler bu ortamın değerlerinin yerine yazılır. Dosyada olmayan anahtarlar silinir.";
+"This environment is protected. Keys that are not in the file are removed." = "Bu ortam korumalı. Dosyada olmayan anahtarlar silinir.";
